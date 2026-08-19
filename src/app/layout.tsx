@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import AppLayout from "@/components/AppLayout";
-import { ClerkProvider } from "@clerk/nextjs";
+import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
   title: "3DMan Thailand - บริการสร้างโมเดล 3D ด้วย AI & ผลิตพิมพ์ชิ้นงานจริงครบวงจร",
@@ -13,10 +13,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const clerkPubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_Y2xlcmsuM2RtYW4udGhhaWxhbmQuZGV2JA';
-
   return (
-    <ClerkProvider publishableKey={clerkPubKey}>
+    <AuthProvider>
       <html lang="th" className="light">
         <body className="antialiased bg-slate-50 text-slate-900 min-h-screen">
           <AppLayout>
@@ -24,6 +22,6 @@ export default function RootLayout({
           </AppLayout>
         </body>
       </html>
-    </ClerkProvider>
+    </AuthProvider>
   );
 }

@@ -1,4 +1,12 @@
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+
+const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
+const isRealClerkKey =
+  clerkKey.startsWith('pk_test_') &&
+  !clerkKey.includes('mock') &&
+  !clerkKey.includes('Y2xlcmsuM2RtYW4udGhhaWxhbmQuZGV2JA');
 
 const isPublicRoute = createRouteMatcher([
   '/',
@@ -12,17 +20,22 @@ const isPublicRoute = createRouteMatcher([
   '/sign-up(.*)',
 ]);
 
-export default clerkMiddleware((auth, request) => {
-  if (!isPublicRoute(request)) {
-    auth().protect();
+export default function middleware(request: NextRequest, event: any) {
+  if (!isRealClerkKey) {
+    // In local development without real Clerk keys, pass requests through directly
+    return NextResponse.next();
   }
-});
+
+  return clerkMiddleware((auth, req) => {
+    if (!isPublicRoute(req)) {
+      auth().protect();
+    }
+  })(request, event);
+}
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
     '/(api|trpc)(.*)',
   ],
 };

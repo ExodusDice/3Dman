@@ -6,6 +6,13 @@ import { usePathname } from 'next/navigation';
 import { Box, Sparkles, ShieldCheck, ShoppingBag, ShieldAlert, MessageSquare, User, Menu, X, Lock, LogIn } from 'lucide-react';
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
 
+const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
+const isRealClerkKey =
+  Boolean(clerkKey) &&
+  clerkKey.startsWith('pk_test_') &&
+  !clerkKey.includes('mock') &&
+  !clerkKey.includes('Y2xlcmsuM2RtYW4udGhhaWxhbmQuZGV2JA');
+
 interface NavbarProps {
   onOpenChat?: () => void;
   unreadChatCount?: number;
@@ -90,26 +97,38 @@ export default function Navbar({ onOpenChat, unreadChatCount = 0 }: NavbarProps)
             </button>
           )}
 
-          {/* Clerk Auth Section */}
+          {/* Auth Section */}
           <div className="hidden sm:flex items-center gap-2.5 pl-3 border-l border-slate-200">
-            <SignedIn>
-              <UserButton
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    avatarBox: 'w-8 h-8 rounded-xl border border-slate-200 shadow-sm',
-                  },
-                }}
-              />
-            </SignedIn>
-            <SignedOut>
-              <SignInButton mode="modal">
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-violet-700 bg-slate-100 hover:bg-violet-50 border border-slate-200 transition-all shadow-sm">
-                  <LogIn className="w-3.5 h-3.5 text-violet-600" />
-                  <span>เข้าสู่ระบบ</span>
-                </button>
-              </SignInButton>
-            </SignedOut>
+            {isRealClerkKey ? (
+              <>
+                <SignedIn>
+                  <UserButton
+                    afterSignOutUrl="/"
+                    appearance={{
+                      elements: {
+                        avatarBox: 'w-8 h-8 rounded-xl border border-slate-200 shadow-sm',
+                      },
+                    }}
+                  />
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-violet-700 bg-slate-100 hover:bg-violet-50 border border-slate-200 transition-all shadow-sm">
+                      <LogIn className="w-3.5 h-3.5 text-violet-600" />
+                      <span>เข้าสู่ระบบ</span>
+                    </button>
+                  </SignInButton>
+                </SignedOut>
+              </>
+            ) : (
+              <Link
+                href="/studio"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-violet-700 bg-slate-100 hover:bg-violet-50 border border-slate-200 transition-all shadow-sm"
+              >
+                <User className="w-3.5 h-3.5 text-violet-600" />
+                <span>โหมดผู้เยี่ยมชม (Guest)</span>
+              </Link>
+            )}
           </div>
 
           {/* Studio Quick CTA */}
@@ -151,16 +170,6 @@ export default function Navbar({ onOpenChat, unreadChatCount = 0 }: NavbarProps)
               </Link>
             );
           })}
-
-          <div className="pt-2 border-t border-slate-100">
-            <SignedOut>
-              <SignInButton mode="modal">
-                <button className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-xs font-bold shadow-sm">
-                  เข้าสู่ระบบ / ลงทะเบียน
-                </button>
-              </SignInButton>
-            </SignedOut>
-          </div>
         </div>
       )}
     </header>
