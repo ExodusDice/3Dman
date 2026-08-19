@@ -1,20 +1,16 @@
 import { withSentryConfig } from '@sentry/nextjs';
 
-const isStaticExport = process.env.STATIC_EXPORT === 'true' || Boolean(process.env.GITHUB_ACTIONS);
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || (isStaticExport ? '/3dman' : '');
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: isStaticExport ? 'export' : undefined,
   basePath: basePath || undefined,
   assetPrefix: basePath || undefined,
   typescript: {
-    // Prevent build failures on CI
     ignoreBuildErrors: true,
   },
   eslint: {
-    // Prevent build failures on CI
     ignoreDuringBuilds: true,
   },
   images: {
