@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: 3dman-platform
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_BASE_PATH=/3dman
+      - NEXT_PUBLIC_APP_URL=https://www.franktest.xyz/3dman
+      - PORT=3000
+    volumes:
+      - ./data:/app/.data

@@ -1,9 +1,17 @@
 import { withSentryConfig } from '@sentry/nextjs';
 
+const isStaticExport = process.env.STATIC_EXPORT === 'true' || Boolean(process.env.GITHUB_ACTIONS);
+const basePath = isStaticExport ? '/3dman' : (process.env.NEXT_PUBLIC_BASE_PATH || '');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: isStaticExport ? 'export' : undefined,
+  basePath: basePath,
+  assetPrefix: basePath,
+  trailingSlash: isStaticExport ? true : false,
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -14,8 +22,6 @@ const nextConfig = {
 };
 
 export default withSentryConfig(nextConfig, {
-  // For all available options, see:
-  // https://github.com/getsentry/sentry-webpack-plugin#options
   org: '3dman-thailand',
   project: '3dman-web',
   silent: true,
