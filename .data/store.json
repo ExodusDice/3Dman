@@ -1,0 +1,387 @@
+{
+  "orders": [
+    {
+      "customerName": "Marcus Aurelius Fan",
+      "customerEmail": "marcus@rome.org",
+      "status": "slice_prep",
+      "prompt": "Antique Bronze Roman Legion Eagle standard with detailed plumage",
+      "style": "cyberpunk",
+      "modelGeometry": {
+        "shape": "cyberpunk_helmet",
+        "widthCm": 14.4,
+        "heightCm": 18,
+        "depthCm": 12.6,
+        "infillPercent": 35,
+        "triangleCount": 95000
+      },
+      "material": {
+        "id": "antique_cast_bronze",
+        "name": "Solid Cast Bronze Metal",
+        "densityGPerCm3": 3.9,
+        "pricePerGram": 0.38
+      },
+      "shippingOption": {
+        "id": "standard_14d",
+        "name": "Guaranteed 14-Day SLA Delivery",
+        "slaDays": 14,
+        "price": 9.99,
+        "description": "Our signature standard commitment. Precision printed, hand-cured, and delivered to your doorstep within 14 calendar days.",
+        "guaranteeText": "100% Full Refund Guarantee if not delivered within 14 days.",
+        "badge": "14-Day SLA Guaranteed"
+      },
+      "shippingAddress": {
+        "fullName": "Marcus Aurelius Fan",
+        "email": "marcus@rome.org",
+        "phone": "+1 (555) 000-0000",
+        "addressLine1": "Client Address On File",
+        "city": "Metropolis",
+        "state": "CA",
+        "postalCode": "90210",
+        "country": "United States"
+      },
+      "pricing": {
+        "volumeCm3": 925.6,
+        "estimatedWeightGrams": 3610,
+        "printTimeHours": 30.6,
+        "aiComputeFee": 6.5,
+        "rawMaterialCost": 1371.8,
+        "machineTimeCost": 67.32,
+        "handFinishingQAFee": 7.5,
+        "slaInsuranceFee": 4,
+        "shippingFee": 9.99,
+        "cogsTotal": 1457.12,
+        "profitMarginAmount": -1337.12,
+        "profitMarginPercent": 0,
+        "subtotal": 120,
+        "totalPrice": 129.99,
+        "originalPrice": 3479.32,
+        "isPriceOverridden": true,
+        "priceOverrideReason": "VIP repeat customer courtesy discount"
+      },
+      "revisionCount": 0,
+      "maxRevisionsAllowed": 3,
+      "revisionHistory": [],
+      "slaGuaranteedDeliveryDate": "2026-09-02T07:11:17.576Z",
+      "isSlaMet": true,
+      "adminNotes": "Direct operator job created with pre-negotiated pricing. | Price adjusted to $120.00 by Admin: VIP repeat customer courtesy discount",
+      "id": "ord_1787123477578_517",
+      "orderNumber": "ORD-94682",
+      "createdAt": "2026-08-19T07:11:17.578Z",
+      "updatedAt": "2026-08-19T07:11:17.697Z"
+    },
+    {
+      "id": "ord_1",
+      "orderNumber": "ORD-88219",
+      "createdAt": "2026-08-15T07:11:09.988Z",
+      "updatedAt": "2026-08-18T07:11:09.988Z",
+      "customerName": "Alex Mercer",
+      "customerEmail": "alex.mercer@cyberart.io",
+      "status": "printing",
+      "prompt": "Cyberpunk Oni warrior mask with geometric angular horns and cyber-optic breather vents",
+      "style": "cyberpunk",
+      "modelGeometry": {
+        "shape": "cyberpunk_helmet",
+        "widthCm": 14,
+        "heightCm": 18,
+        "depthCm": 12,
+        "infillPercent": 35,
+        "triangleCount": 124000
+      },
+      "material": {
+        "id": "petg_carbon_fiber",
+        "name": "Carbon Fiber Reinforced PETG",
+        "category": "Specialty",
+        "description": "Infused with high-modulus chopped carbon fibers. Extreme mechanical rigidity, stealth dark textured finish.",
+        "finish": "Textured Stealth Matte",
+        "colorHex": "#1e293b",
+        "densityGPerCm3": 1.35,
+        "pricePerGram": 0.19,
+        "durability": 5,
+        "detailLevel": 4,
+        "badge": "Extreme Strength",
+        "textureRoughness": 0.8,
+        "textureMetalness": 0.3
+      },
+      "shippingOption": {
+        "id": "standard_14d",
+        "name": "Guaranteed 14-Day SLA Delivery",
+        "slaDays": 14,
+        "price": 9.99,
+        "description": "Our signature standard commitment. Precision printed, hand-cured, and delivered to your doorstep within 14 calendar days.",
+        "guaranteeText": "100% Full Refund Guarantee if not delivered within 14 days.",
+        "badge": "14-Day SLA Guaranteed"
+      },
+      "shippingAddress": {
+        "fullName": "Alex Mercer",
+        "email": "alex.mercer@cyberart.io",
+        "phone": "+1 (512) 555-0192",
+        "addressLine1": "404 Silicon Hills Blvd, Suite 300",
+        "city": "Austin",
+        "state": "TX",
+        "postalCode": "78701",
+        "country": "United States",
+        "specialInstructions": "Leave in lobby with doorman if after 5 PM."
+      },
+      "pricing": {
+        "volumeCm3": 857,
+        "estimatedWeightGrams": 1157,
+        "printTimeHours": 28.9,
+        "aiComputeFee": 6.5,
+        "rawMaterialCost": 219.83,
+        "machineTimeCost": 63.58,
+        "handFinishingQAFee": 7.5,
+        "slaInsuranceFee": 4,
+        "shippingFee": 9.99,
+        "cogsTotal": 301.41,
+        "profitMarginAmount": 416.23,
+        "profitMarginPercent": 58,
+        "subtotal": 717.64,
+        "totalPrice": 727.63,
+        "isPriceOverridden": false
+      },
+      "revisionCount": 1,
+      "maxRevisionsAllowed": 3,
+      "revisionHistory": [
+        {
+          "timestamp": "2026-08-15T07:11:09.988Z",
+          "prompt": "Cyberpunk Oni mask with horns",
+          "style": "cyberpunk",
+          "materialId": "petg_carbon_fiber"
+        }
+      ],
+      "slaGuaranteedDeliveryDate": "2026-08-29T07:11:09.988Z",
+      "isSlaMet": true,
+      "trackingNumber": "3DM-9948201-US",
+      "trackingCarrier": "FedEx Express Air",
+      "adminNotes": "High-precision slicing completed. Running on Industrial Prusa XL 0.4mm nozzle."
+    },
+    {
+      "id": "ord_2",
+      "orderNumber": "ORD-77194",
+      "createdAt": "2026-08-13T07:11:09.988Z",
+      "updatedAt": "2026-08-17T07:11:09.988Z",
+      "customerName": "Elena Rostova",
+      "customerEmail": "elena.rostova@galleryart.org",
+      "status": "quality_inspection",
+      "prompt": "Marcus Aurelius Roman Emperor stoic bust sculpture with classical folds and weathered patina",
+      "style": "ancient_bronze",
+      "modelGeometry": {
+        "shape": "roman_bust",
+        "widthCm": 12,
+        "heightCm": 16,
+        "depthCm": 11,
+        "infillPercent": 40,
+        "triangleCount": 98000
+      },
+      "material": {
+        "id": "antique_cast_bronze",
+        "name": "Solid Cast Bronze Metal",
+        "category": "Metal Composite",
+        "description": "Authentic 80% bronze powder matrix, hand-polished and sealed with museum-grade patina. Heavy authentic weight in hand.",
+        "finish": "Polished Metallic Patina",
+        "colorHex": "#d97706",
+        "densityGPerCm3": 3.9,
+        "pricePerGram": 0.38,
+        "durability": 5,
+        "detailLevel": 5,
+        "badge": "Luxury Museum Grade",
+        "textureRoughness": 0.25,
+        "textureMetalness": 0.9
+      },
+      "shippingOption": {
+        "id": "express_7d",
+        "name": "Priority Rush 7-Day SLA",
+        "slaDays": 7,
+        "price": 24.99,
+        "description": "Jumps directly to the front of our industrial printer batch queue with expedited Air Shipping.",
+        "guaranteeText": "100% Full Refund Guarantee if not delivered within 7 days.",
+        "badge": "Express Priority"
+      },
+      "shippingAddress": {
+        "fullName": "Elena Rostova",
+        "email": "elena.rostova@galleryart.org",
+        "phone": "+1 (206) 555-0144",
+        "addressLine1": "1201 3rd Avenue, Apt 14B",
+        "city": "Seattle",
+        "state": "WA",
+        "postalCode": "98101",
+        "country": "United States"
+      },
+      "pricing": {
+        "volumeCm3": 637,
+        "estimatedWeightGrams": 2484,
+        "printTimeHours": 22.7,
+        "aiComputeFee": 6.5,
+        "rawMaterialCost": 943.92,
+        "machineTimeCost": 49.94,
+        "handFinishingQAFee": 7.5,
+        "slaInsuranceFee": 4,
+        "shippingFee": 24.99,
+        "cogsTotal": 1011.86,
+        "profitMarginAmount": 1397.33,
+        "profitMarginPercent": 58,
+        "subtotal": 2409.19,
+        "totalPrice": 2434.18,
+        "isPriceOverridden": false
+      },
+      "revisionCount": 2,
+      "maxRevisionsAllowed": 3,
+      "revisionHistory": [
+        {
+          "timestamp": "2026-08-13T07:11:09.988Z",
+          "prompt": "Greek philosopher bust",
+          "style": "sculpted_marble",
+          "materialId": "antique_cast_bronze"
+        }
+      ],
+      "slaGuaranteedDeliveryDate": "2026-08-20T07:11:09.988Z",
+      "isSlaMet": true,
+      "trackingNumber": "3DM-4820194-EXP",
+      "trackingCarrier": "DHL Express",
+      "adminNotes": "Cast bronze polished, undergoing final optical dimensional inspection."
+    },
+    {
+      "id": "ord_3",
+      "orderNumber": "ORD-99302",
+      "createdAt": "2026-08-18T07:11:09.988Z",
+      "updatedAt": "2026-08-18T07:11:09.988Z",
+      "customerName": "Kenji Sato",
+      "customerEmail": "kenji.sato@creative.jp",
+      "status": "slice_prep",
+      "prompt": "Majestic celestial dragon wrapped around a crystalline sphere with sharp scales and fierce gaze",
+      "style": "realistic",
+      "modelGeometry": {
+        "shape": "dragon_sculpture",
+        "widthCm": 15,
+        "heightCm": 17,
+        "depthCm": 14,
+        "infillPercent": 30,
+        "triangleCount": 145000
+      },
+      "material": {
+        "id": "sla_ultra_resin",
+        "name": "8K Ultra-Detail Resin",
+        "category": "Resin",
+        "description": "Microscopic 25-micron layer precision. Ideal for highly detailed anime figures, character sculptures & jewelry prototypes.",
+        "finish": "Ultra-Smooth Matte or Gloss",
+        "colorHex": "#e2e8f0",
+        "densityGPerCm3": 1.18,
+        "pricePerGram": 0.14,
+        "durability": 4,
+        "detailLevel": 5,
+        "badge": "Best for Figurines",
+        "textureRoughness": 0.2,
+        "textureMetalness": 0.05
+      },
+      "shippingOption": {
+        "id": "standard_14d",
+        "name": "Guaranteed 14-Day SLA Delivery",
+        "slaDays": 14,
+        "price": 9.99,
+        "description": "Our signature standard commitment. Precision printed, hand-cured, and delivered to your doorstep within 14 calendar days.",
+        "guaranteeText": "100% Full Refund Guarantee if not delivered within 14 days.",
+        "badge": "14-Day SLA Guaranteed"
+      },
+      "shippingAddress": {
+        "fullName": "Kenji Sato",
+        "email": "kenji.sato@creative.jp",
+        "phone": "+1 (415) 555-0811",
+        "addressLine1": "750 Mission Street, Unit 802",
+        "city": "San Francisco",
+        "state": "CA",
+        "postalCode": "94103",
+        "country": "United States"
+      },
+      "pricing": {
+        "volumeCm3": 946.8,
+        "estimatedWeightGrams": 1117,
+        "printTimeHours": 30.8,
+        "aiComputeFee": 6.5,
+        "rawMaterialCost": 156.38,
+        "machineTimeCost": 67.76,
+        "handFinishingQAFee": 7.5,
+        "slaInsuranceFee": 4,
+        "shippingFee": 9.99,
+        "cogsTotal": 242.14,
+        "profitMarginAmount": 334.38,
+        "profitMarginPercent": 58,
+        "subtotal": 576.52,
+        "totalPrice": 586.51,
+        "isPriceOverridden": false
+      },
+      "revisionCount": 0,
+      "maxRevisionsAllowed": 3,
+      "revisionHistory": [],
+      "slaGuaranteedDeliveryDate": "2026-09-01T07:11:09.988Z",
+      "isSlaMet": true,
+      "adminNotes": "Generating tree supports for dragon talons and horns."
+    }
+  ],
+  "chats": [
+    {
+      "id": "msg_1",
+      "orderId": "ORD-88219",
+      "sender": "admin",
+      "senderName": "Master Artisan Dave (Admin)",
+      "message": "Hello Alex! We have sliced your Cyberpunk Oni mesh with 0.12mm layer height and reinforced support pillars. Print is running smoothly!",
+      "timestamp": "2026-08-16T07:11:09.974Z"
+    },
+    {
+      "id": "msg_2",
+      "orderId": "ORD-88219",
+      "sender": "customer",
+      "senderName": "Alex Mercer",
+      "message": "Awesome! Can you make sure the horn tips are polished with extra matte coating?",
+      "timestamp": "2026-08-17T07:11:09.975Z"
+    },
+    {
+      "id": "msg_3",
+      "orderId": "ORD-88219",
+      "sender": "admin",
+      "senderName": "Master Artisan Dave (Admin)",
+      "message": "Absolutely! Our post-processing lab will hand-finish the edges before shipping.",
+      "timestamp": "2026-08-18T07:11:09.975Z"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_1",
+      "customerName": "Alex Mercer",
+      "location": "Austin, TX",
+      "title": "Mind-blowing detail & arrived in 9 days!",
+      "review": "I gave Meshy a prompt for a Cyberpunk Oni mask and selected the Carbon Fiber PETG. The physical print arrived earlier than the 14-day SLA, and the quality is completely indistinguishable from industrial factory prototypes. 10/10!",
+      "rating": 5,
+      "materialUsed": "Carbon Fiber Reinforced PETG",
+      "printSize": "16.5cm Height",
+      "timeToDeliverDays": 9,
+      "imageUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80",
+      "modelType": "Cyberpunk Helmet"
+    },
+    {
+      "id": "rev_2",
+      "customerName": "Elena Rostova",
+      "location": "Seattle, WA",
+      "title": "Solid bronze sculpture is museum quality",
+      "review": "I was skeptical about AI 3D to physical metal casting, but the antique bronze finish has a genuine heavy weight (over 400g!). The admin team answered my questions via direct chat within 5 minutes. Amazing service.",
+      "rating": 5,
+      "materialUsed": "Solid Cast Bronze Metal",
+      "printSize": "15.0cm Height",
+      "timeToDeliverDays": 11,
+      "imageUrl": "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80",
+      "modelType": "Roman Emperor Bust"
+    },
+    {
+      "id": "rev_3",
+      "customerName": "Kenji Sato",
+      "location": "San Francisco, CA",
+      "title": "Smooth 8K resin detail for my gaming shelf",
+      "review": "Used 2 of my 3 prompt revisions to refine the wings on my dragon model before locking the order. The SLA delivery guarantee gave me complete peace of mind. Arrived perfectly boxed with zero layer lines.",
+      "rating": 5,
+      "materialUsed": "8K Ultra-Detail Resin",
+      "printSize": "18.0cm Wingspan",
+      "timeToDeliverDays": 8,
+      "imageUrl": "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=800&q=80",
+      "modelType": "Mythical Dragon"
+    }
+  ]
+}
