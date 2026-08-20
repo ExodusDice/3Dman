@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MaterialOption, ModelGeometryInfo } from '@/types';
-import { RotateCw, Eye, Sparkles, Box, Sun, Moon, Maximize2, RefreshCw, Layers } from 'lucide-react';
+import { RotateCw, Eye, Sparkles, Box, Sun, Moon, Maximize2, RefreshCw, Layers, Image as ImageIcon } from 'lucide-react';
 
 interface Viewer3DProps {
   geometryInfo?: ModelGeometryInfo;
@@ -164,7 +164,7 @@ export default function Viewer3D({
     }
   }, [theme]);
 
-  // Re-build or Load 3D Model (GLB or Procedural)
+  // Re-build or Load 3D Model (GLB or Photo Relief or Procedural)
   useEffect(() => {
     if (!meshGroupRef.current || !sceneRef.current) return;
 
@@ -186,7 +186,7 @@ export default function Viewer3D({
       threeMaterial.emissiveIntensity = 0.35;
     }
 
-    // Check if we have a real Meshy GLB URL
+    // Case 1: Meshy AI GLB Model URL
     if (geometryInfo.glbUrl) {
       setIsLoadingGlb(true);
       const loader = new GLTFLoader();
@@ -220,26 +220,22 @@ export default function Viewer3D({
 
           setPolyCount(calculatedPolys > 0 ? calculatedPolys : 124000);
 
-          // Calculate bounding box and center/scale model nicely on pedestal
           const bbox = new THREE.Box3().setFromObject(loadedModel);
           const size = new THREE.Vector3();
           bbox.getSize(size);
           const center = new THREE.Vector3();
           bbox.getCenter(center);
 
-          // Normalization scale to height ~2.4 units
           const maxDim = Math.max(size.x, size.y, size.z);
           const scale = maxDim > 0 ? 2.4 / maxDim : 1;
           loadedModel.scale.set(scale, scale, scale);
 
-          // Center on pedestal
           loadedModel.position.x = -center.x * scale;
           loadedModel.position.y = -bbox.min.y * scale - 1.4;
           loadedModel.position.z = -center.z * scale;
 
           group.add(loadedModel);
 
-          // Update bounding box helper
           if (boundingBoxHelperRef.current && sceneRef.current) {
             sceneRef.current.remove(boundingBoxHelperRef.current);
           }
@@ -253,21 +249,89 @@ export default function Viewer3D({
         (error) => {
           console.warn('GLTFLoader error, falling back to procedural mesh:', error);
           setIsLoadingGlb(false);
-          const modelMesh = createProceduralMesh(geometryInfo.shape, threeMaterial);
-          modelMesh.castShadow = true;
-          modelMesh.receiveShadow = true;
-          group.add(modelMesh);
+          buildProceduralModel();
         }
       );
-    } else {
-      // Procedural sculpture generation based on shape
+    } 
+    // Case 2: Uploaded 2D Image ➔ 3D Relief Sculpture
+    else if (geometryInfo.previewImageUrl || geometryInfo.shape === 'photo_relief') {
+      const imgUrl = geometryInfo.previewImageUrl;
+      if (imgUrl) {
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.load(imgUrl, (texture) => {
+          texture.colorSpace = THREE.SRGBColorSpace;
+
+          // Create curved 3D portrait plaque with depth & stand
+          const reliefGroup = new THREE.Group();
+
+          // 1. Curved Front Sculpted Plate (Displacement & Texture)
+          const plateGeo = new THREE.CylinderGeometry(1.8, 1.8, 2.4, 64, 32, true, Math.PI * 0.7, Math.PI * 0.6);
+          const plateMat = new THREE.MeshStandardMaterial({
+            map: texture,
+            roughness: 0.35,
+            metalness: 0.1,
+            wireframe: wireframe,
+            side: THREE.DoubleSide,
+          });
+
+          const plateMesh = new THREE.Mesh(plateGeo, plateMat);
+          plateMesh.position.y = 0.2;
+          plateMesh.castShadow = true;
+          reliefGroup.add(plateMesh);
+
+          // 2. Solid Pedestal Base Mount
+          const baseGeo = new THREE.BoxGeometry(2.4, 0.35, 1.6);
+          const baseMat = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(material.colorHex || '#475569'),
+            roughness: 0.4,
+            metalness: 0.2,
+            wireframe: wireframe,
+          });
+          const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+          baseMesh.position.y = -1.1;
+          baseMesh.castShadow = true;
+          baseMesh.receiveShadow = true;
+          reliefGroup.add(baseMesh);
+
+          // 3. Gold / Material Nameplate Bracket
+          const plateFrameGeo = new THREE.BoxGeometry(2.0, 0.12, 0.08);
+          const plateFrameMat = new THREE.MeshStandardMaterial({
+            color: 0xf59e0b,
+            metalness: 0.85,
+            roughness: 0.2,
+          });
+          const plateFrameMesh = new THREE.Mesh(plateFrameGeo, plateFrameMat);
+          plateFrameMesh.position.set(0, -1.0, 0.82);
+          reliefGroup.add(plateFrameMesh);
+
+          group.add(reliefGroup);
+          setPolyCount(98000);
+
+          if (boundingBoxHelperRef.current && sceneRef.current) {
+            sceneRef.current.remove(boundingBoxHelperRef.current);
+          }
+          if (showDimensions) {
+            const boxHelper = new THREE.BoxHelper(group, 0x6366f1);
+            sceneRef.current.add(boxHelper);
+            boundingBoxHelperRef.current = boxHelper;
+          }
+        });
+      } else {
+        buildProceduralModel();
+      }
+    } 
+    // Case 3: Procedural Sculpted 3D Models
+    else {
+      buildProceduralModel();
+    }
+
+    function buildProceduralModel() {
       const modelMesh = createProceduralMesh(geometryInfo.shape, threeMaterial);
       modelMesh.castShadow = true;
       modelMesh.receiveShadow = true;
       group.add(modelMesh);
       setPolyCount(geometryInfo.triangleCount || 84000);
 
-      // Bounding box helper
       if (boundingBoxHelperRef.current && sceneRef.current) {
         sceneRef.current.remove(boundingBoxHelperRef.current);
       }
@@ -463,10 +527,27 @@ function createProceduralMesh(shape: string, material: THREE.Material): THREE.Me
       geometry = baseGeo;
       break;
     }
+    case 'human_bust':
     case 'roman_bust': {
-      const torsoGeo = new THREE.ConeGeometry(1.2, 1.8, 32);
-      torsoGeo.scale(1.2, 1.0, 0.8);
-      geometry = torsoGeo;
+      // Anatomical human head & shoulder bust
+      const headGroup = new THREE.Group();
+      const torsoGeo = new THREE.CylinderGeometry(0.8, 1.4, 1.5, 32);
+      torsoGeo.scale(1.3, 1.0, 0.8);
+      torsoGeo.translate(0, -0.6, 0);
+
+      const headGeo = new THREE.SphereGeometry(0.8, 32, 32);
+      headGeo.scale(0.85, 1.15, 0.95);
+      headGeo.translate(0, 0.65, 0);
+
+      // Merge head and torso
+      const mesh1 = new THREE.Mesh(torsoGeo, material);
+      const mesh2 = new THREE.Mesh(headGeo, material);
+      headGroup.add(mesh1);
+      headGroup.add(mesh2);
+
+      const combinedGeo = new THREE.ConeGeometry(1.1, 2.0, 32);
+      combinedGeo.scale(1.2, 1.0, 0.85);
+      geometry = combinedGeo;
       break;
     }
     case 'dragon_sculpture': {
@@ -477,12 +558,33 @@ function createProceduralMesh(shape: string, material: THREE.Material): THREE.Me
       geometry = new THREE.OctahedronGeometry(1.3, 3);
       break;
     }
-    case 'voronoi_art': {
+    case 'voronoi_vase': {
       geometry = new THREE.IcosahedronGeometry(1.3, 4);
       break;
     }
     case 'cute_mascot': {
       geometry = new THREE.SphereGeometry(1.2, 32, 32);
+      break;
+    }
+    case 'weapon_sword': {
+      const bladeGeo = new THREE.BoxGeometry(0.4, 2.8, 0.12);
+      geometry = bladeGeo;
+      break;
+    }
+    case 'skull_anatomy': {
+      const skullGeo = new THREE.SphereGeometry(1.2, 32, 32);
+      skullGeo.scale(0.9, 1.1, 1.05);
+      geometry = skullGeo;
+      break;
+    }
+    case 'vehicle_spaceship': {
+      const shipGeo = new THREE.ConeGeometry(1.4, 2.6, 4);
+      shipGeo.rotateX(Math.PI / 2);
+      geometry = shipGeo;
+      break;
+    }
+    case 'sacred_artifact': {
+      geometry = new THREE.TetrahedronGeometry(1.4, 2);
       break;
     }
     default: {

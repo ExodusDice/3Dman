@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ArtStyle, MaterialOption, ModelGeometryInfo, ShippingOption } from '@/types';
 import { AVAILABLE_MATERIALS, AVAILABLE_SHIPPING_OPTIONS } from '@/lib/materials';
 import { calculateProfitPrice } from '@/lib/pricing';
+import { matchShapeFromPrompt } from '@/lib/meshy';
 import Viewer3D from '@/components/Viewer3D';
 import PriceEstimator from '@/components/Studio/PriceEstimator';
 import CheckoutModal from '@/components/CheckoutModal';
@@ -24,8 +25,7 @@ import {
   X, 
   ExternalLink, 
   FileText, 
-  HelpCircle,
-  Check
+  RotateCcw
 } from 'lucide-react';
 
 const SUGGESTED_PROMPTS = [
@@ -101,7 +101,7 @@ export default function AIStudio() {
     setIsApiKeyModalOpen(false);
   };
 
-  // Image Upload Handler
+  // Image Upload Handler: Immediately maps uploaded photo into 3D relief
   const handleImageFile = (file: File) => {
     if (!file.type.startsWith('image/')) {
       alert('กรุณาอัปโหลดไฟล์รูปภาพ เช่น PNG, JPG หรือ WEBP (Please upload an image file)');
@@ -118,6 +118,15 @@ export default function AIStudio() {
       const base64 = e.target?.result as string;
       setUploadedImageBase64(base64);
       setUploadedFileName(file.name);
+      
+      // Update 3D canvas immediately with uploaded photo relief
+      setGeometryInfo((prev) => ({
+        ...prev,
+        shape: 'photo_relief',
+        previewImageUrl: base64,
+        glbUrl: undefined,
+        triangleCount: 98000,
+      }));
     };
     reader.readAsDataURL(file);
   };
@@ -127,6 +136,12 @@ export default function AIStudio() {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleImageFile(e.dataTransfer.files[0]);
     }
+  };
+
+  // Reset / Start fresh project
+  const handleResetRevisions = () => {
+    setRevisionCount(0);
+    setRevisionHistory([]);
   };
 
   // Calculate live profit price
@@ -150,11 +165,6 @@ export default function AIStudio() {
 
     if (studioMode === 'image' && !uploadedImageBase64) {
       alert('กรุณาอัปโหลดรูปภาพที่ต้องการแปลงเป็น 3D (Please upload an image)');
-      return;
-    }
-
-    if (revisionCount >= maxRevisions) {
-      alert('คุณใช้สิทธิ์ปรับแต่งครบ 3 ครั้งแล้วสำหรับรอบนี้ กรุณายืนยันคำสั่งซื้อ หรือเริ่มรอบใหม่');
       return;
     }
 
@@ -185,18 +195,24 @@ export default function AIStudio() {
       const activeTaskId = initialResult.taskId;
       setTaskId(activeTaskId);
 
-      // If simulated/local task, finish immediately
+      // If simulated/local task, finish immediately with accurate shape
       if (activeTaskId.startsWith('meshy_local_')) {
         setGenerationProgress(100);
         setStatusMessage('เรนเดอร์โมเดล 3D สำเร็จ!');
+        
+        const matchedShape = studioMode === 'image' 
+          ? 'photo_relief' 
+          : matchShapeFromPrompt(prompt, artStyle);
+
         setGeometryInfo((prev) => ({
           ...prev,
-          shape: initialResult.modelGeometry.shape,
+          shape: matchedShape,
           glbUrl: undefined,
           previewImageUrl: uploadedImageBase64 || undefined,
-          triangleCount: initialResult.modelGeometry.triangleCount,
+          triangleCount: initialResult.modelGeometry?.triangleCount || 124000,
         }));
-        setRevisionCount((c) => c + 1);
+
+        setRevisionCount((c) => Math.min(c + 1, maxRevisions));
         setRevisionHistory((prev) => [
           ...prev,
           { prompt: studioMode === 'image' ? `Image: ${uploadedFileName}` : prompt.trim(), style: artStyle, timestamp: new Date().toLocaleTimeString('th-TH') },
@@ -236,7 +252,7 @@ export default function AIStudio() {
             triangleCount: pollData.modelGeometry?.triangleCount || 142000,
           }));
 
-          setRevisionCount((c) => c + 1);
+          setRevisionCount((c) => Math.min(c + 1, maxRevisions));
           setRevisionHistory((prev) => [
             ...prev,
             { prompt: studioMode === 'image' ? `Image: ${uploadedFileName}` : prompt.trim(), style: artStyle, timestamp: new Date().toLocaleTimeString('th-TH') },
@@ -326,13 +342,26 @@ export default function AIStudio() {
                 <span>สตูดิโอ Meshy AI Engine</span>
               </h2>
 
-              {/* Revision Badge */}
-              <div className={`px-2.5 py-1 rounded-full text-xs font-mono font-semibold flex items-center gap-1.5 ${
-                revisionCount < 3
-                  ? 'bg-violet-50 text-violet-700 border border-violet-200'
-                  : 'bg-amber-50 text-amber-800 border border-amber-300'
-              }`}>
-                <span>เหลือสิทธิ์แก้ {maxRevisions - revisionCount} / {maxRevisions} ครั้ง</span>
+              {/* Revision Badge & Reset */}
+              <div className="flex items-center gap-1.5">
+                <div className={`px-2.5 py-1 rounded-full text-xs font-mono font-semibold flex items-center gap-1.5 ${
+                  revisionCount < maxRevisions
+                    ? 'bg-violet-50 text-violet-700 border border-violet-200'
+                    : 'bg-amber-50 text-amber-800 border border-amber-300'
+                }`}>
+                  <span>สิทธิ์ปรับแต่ง {Math.max(0, maxRevisions - revisionCount)} / {maxRevisions} ครั้ง</span>
+                </div>
+
+                {revisionCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleResetRevisions}
+                    className="p-1 text-slate-400 hover:text-violet-600 rounded-lg hover:bg-violet-50 transition-colors"
+                    title="เริ่มโปรเจกต์ใหม่ / รีเซ็ตสิทธิ์"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -340,7 +369,11 @@ export default function AIStudio() {
             <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl">
               <button
                 type="button"
-                onClick={() => setStudioMode('text')}
+                onClick={() => {
+                  setStudioMode('text');
+                  const matched = matchShapeFromPrompt(prompt, artStyle);
+                  setGeometryInfo((prev) => ({ ...prev, shape: matched, previewImageUrl: undefined }));
+                }}
                 className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                   studioMode === 'text'
                     ? 'bg-white text-violet-700 shadow-sm'
@@ -353,7 +386,12 @@ export default function AIStudio() {
 
               <button
                 type="button"
-                onClick={() => setStudioMode('image')}
+                onClick={() => {
+                  setStudioMode('image');
+                  if (uploadedImageBase64) {
+                    setGeometryInfo((prev) => ({ ...prev, shape: 'photo_relief', previewImageUrl: uploadedImageBase64 }));
+                  }
+                }}
                 className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                   studioMode === 'image'
                     ? 'bg-white text-cyan-700 shadow-sm'
@@ -375,7 +413,11 @@ export default function AIStudio() {
                     </label>
                     <textarea
                       value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
+                      onChange={(e) => {
+                        setPrompt(e.target.value);
+                        const matched = matchShapeFromPrompt(e.target.value, artStyle);
+                        setGeometryInfo((prev) => ({ ...prev, shape: matched }));
+                      }}
                       rows={3}
                       placeholder="e.g. Cyberpunk samurai oni mask, Roman bronze bust, dragon coiled around crystal orb..."
                       className="w-full bg-slate-50 border border-slate-300 focus:border-violet-500 rounded-2xl p-3.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-colors resize-none leading-relaxed shadow-inner"
@@ -399,7 +441,11 @@ export default function AIStudio() {
                         <button
                           key={style.id}
                           type="button"
-                          onClick={() => setArtStyle(style.id as ArtStyle)}
+                          onClick={() => {
+                            setArtStyle(style.id as ArtStyle);
+                            const matched = matchShapeFromPrompt(prompt, style.id as ArtStyle);
+                            setGeometryInfo((prev) => ({ ...prev, shape: matched }));
+                          }}
                           className={`px-3 py-2 rounded-xl text-left font-medium transition-all ${
                             artStyle === style.id
                               ? 'bg-violet-600 text-white shadow-md shadow-violet-500/20 font-bold'
@@ -442,13 +488,14 @@ export default function AIStudio() {
                       />
                       <div className="flex-1 min-w-0">
                         <div className="text-xs font-bold text-slate-900 truncate">{uploadedFileName || 'ภาพที่เลือก'}</div>
-                        <div className="text-[11px] text-emerald-600 font-semibold">✓ รูปภาพพร้อมแปลงเป็น 3D</div>
+                        <div className="text-[11px] text-emerald-600 font-semibold">✓ เรนเดอร์ 3D Relief บนหน้าจอแล้ว</div>
                       </div>
                       <button
                         type="button"
                         onClick={() => {
                           setUploadedImageBase64(null);
                           setUploadedFileName('');
+                          setGeometryInfo((prev) => ({ ...prev, shape: 'cyberpunk_helmet', previewImageUrl: undefined }));
                         }}
                         className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50"
                         title="ลบรูปภาพ"
@@ -497,7 +544,7 @@ export default function AIStudio() {
               {/* Generate / Re-edit Button */}
               <button
                 type="submit"
-                disabled={isGenerating || revisionCount >= maxRevisions}
+                disabled={isGenerating}
                 className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white font-bold text-xs shadow-md shadow-violet-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
               >
                 {isGenerating ? (
@@ -513,7 +560,7 @@ export default function AIStudio() {
                 ) : (
                   <>
                     <RefreshCw className="w-4 h-4" />
-                    <span>ปรับแต่งโมเดล 3D (เหลือสิทธิ์ {maxRevisions - revisionCount} ครั้ง)</span>
+                    <span>ปรับแต่งโมเดล 3D (ปรับแก้รอบที่ {revisionCount + 1})</span>
                   </>
                 )}
               </button>
@@ -534,6 +581,8 @@ export default function AIStudio() {
                       onClick={() => {
                         setPrompt(item.text);
                         setArtStyle(item.style);
+                        const matched = matchShapeFromPrompt(item.text, item.style);
+                        setGeometryInfo((prev) => ({ ...prev, shape: matched }));
                       }}
                       className="w-full text-left text-[11px] text-slate-600 hover:text-violet-700 bg-slate-50 hover:bg-slate-100 p-2.5 rounded-xl border border-slate-200 truncate transition-colors font-medium"
                     >

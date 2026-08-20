@@ -88,7 +88,21 @@ export interface PriceBreakdown {
 }
 
 export interface ModelGeometryInfo {
-  shape: 'cyberpunk_helmet' | 'dragon_sculpture' | 'roman_bust' | 'scifi_mech' | 'sacred_artifact' | 'voronoi_vase' | 'cute_mascot' | 'custom_glb';
+  shape: 
+    | 'cyberpunk_helmet' 
+    | 'dragon_sculpture' 
+    | 'roman_bust' 
+    | 'human_bust'
+    | 'scifi_mech' 
+    | 'sacred_artifact' 
+    | 'voronoi_vase' 
+    | 'cute_mascot' 
+    | 'weapon_sword'
+    | 'skull_anatomy'
+    | 'vehicle_spaceship'
+    | 'photo_relief'
+    | 'custom_glb'
+    | string;
   glbUrl?: string;
   previewImageUrl?: string;
   widthCm: number;
