@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Box, Sparkles, ShieldCheck, ShoppingBag, ShieldAlert, MessageSquare, User, Menu, X, Lock, LogIn, Globe } from 'lucide-react';
+import { Box, Sparkles, ShieldCheck, ShoppingBag, ShieldAlert, MessageSquare, User, Menu, X, Lock, LogIn, Globe, Wand2 } from 'lucide-react';
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
 
 const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
@@ -23,7 +23,7 @@ export default function Navbar({ onOpenChat, unreadChatCount = 0 }: NavbarProps)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { name: 'สตูดิโอ 3D AI', href: '/studio', icon: Sparkles },
+    { name: 'สั่งทำชิ้นงาน 3D', href: '/request-print', icon: Wand2 },
     { name: 'คลังโมเดล STL ฟรี', href: '/free-stl', icon: Globe },
     { name: 'แกลเลอรีผลงาน', href: '/gallery', icon: Box },
     { name: 'รับประกัน SLA 14 วัน', href: '/sla-guarantee', icon: ShieldCheck },
@@ -134,11 +134,11 @@ export default function Navbar({ onOpenChat, unreadChatCount = 0 }: NavbarProps)
 
           {/* Studio Quick CTA */}
           <Link
-            href="/studio"
+            href="/request-print"
             className="hidden lg:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-600 text-white text-xs font-semibold shadow-md shadow-violet-500/20 hover:scale-105 transition-all"
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>สร้างโมเดล 3D</span>
+            <Wand2 className="w-3.5 h-3.5" />
+            <span>สั่งทำชิ้นงาน 3D</span>
           </Link>
 
           {/* Mobile Menu Toggle */}

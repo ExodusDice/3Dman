@@ -36,23 +36,32 @@ export interface ShippingOption {
   badge?: string;
 }
 
-// 3-Phase Fulfillment Flow + Refund States
+// 7-Stage Transparent Artisan Fulfillment Lifecycle
 export type OrderStatus =
-  // Phase 1: Review & Finalization
-  | 'admin_review'                  // Customer paid estimate, admin reviewing 3D mesh & specs
-  | 'price_adjusted_pending_customer' // Admin adjusted price/SLA, waiting customer confirmation
-  | 'approved'                      // Admin approved final price & SLA
-  // Phase 2: Manufacturing & Shipping
-  | 'printing'                      // 3D printer running (layer fabrication)
-  | 'packaging'                     // Post-curing done, optical QA passed, packaging in progress
-  | 'shipping'                      // In transit with carrier tracking
-  // Phase 3: Delivery & Confirmation
-  | 'delivered_pending_confirmation'// Courier delivered, awaiting customer confirmation
-  | 'completed'                     // Customer confirmed receiving & matching order!
-  // Refund Flow
-  | 'refund_requested'              // Customer requested refund
-  | 'refund_approved'               // Admin approved 100% refund
-  | 'refund_rejected';              // Admin rejected refund with explanation
+  // Stage 1 & 2: Order Placed & 300 THB Artisan Deposit
+  | 'deposit_pending'               // Customer submitted request, waiting for 300 THB deposit
+  | 'deposit_paid'                  // 300 THB deposit received, artisan queue started
+  // Stage 3: Artisan 3D Drafting & 3-Round Review
+  | 'artisan_drafting'              // Artisan is hand-crafting / sculpting the 3D model
+  | 'revision_1_review'             // Round 1: Artisan posted draft, awaiting customer review
+  | 'revision_2_review'             // Round 2: LAST CHANCE FOR 300 THB REFUND
+  | 'revision_3_review'             // Round 3: Final design polish
+  // Stage 4: Quotation & Customer Affirmation
+  | 'quotation_pending'             // Design confirmed, final material/weight/SLA price sent
+  | 'affirmation_confirmed'         // Customer agreed to final price/SLA/refund terms
+  // Stage 5: Manufacturing & Packaging
+  | 'printing'                      // 3D printing in progress (SLA running)
+  | 'packaging'                     // Post-processing, curing, optical QA & packaging
+  // Stage 6: Delivery
+  | 'shipping'                      // In transit with courier tracking
+  | 'delivered'                     // Delivered to customer
+  | 'completed'                     // Customer confirmed receiving matching product
+  // Stage 7: 300 THB Cashback Photo Review
+  | 'cashback_submitted'            // Customer uploaded photo for 300 THB cashback
+  | 'cashback_paid'                 // 300 THB cashback paid to customer
+  // Refund States
+  | 'deposit_refunded'              // 300 THB deposit refunded (Round 1 or 2)
+  | 'cancelled_no_refund';          // Cancelled after design confirmation (300 THB retained)
 
 export interface ShippingAddress {
   fullName: string;
@@ -112,21 +121,40 @@ export interface ModelGeometryInfo {
   triangleCount: number;
 }
 
-export interface CustomerReceiptConfirmation {
-  confirmedAt?: string;
-  matchesOrder: boolean;
-  satisfactionRating?: number; // 1-5
-  feedbackNotes?: string;
-  customerPhotoUrl?: string;
+export interface ArtisanRevisionItem {
+  round: number; // 1, 2, or 3
+  submittedAt: string;
+  artisanNote: string;
+  draftImageUrl?: string;
+  draft3dUrl?: string;
+  customerFeedback?: string;
+  customerFeedbackAt?: string;
+  status: 'pending_customer' | 'approved' | 'rework_requested' | 'refund_requested';
+  isLastChanceRefund?: boolean; // true for round 2
 }
 
-export interface RefundRequestInfo {
-  requestedAt: string;
-  reason: string;
-  status: 'pending' | 'approved' | 'rejected';
-  adminResponse?: string;
-  resolvedAt?: string;
-  refundAmount?: number;
+export interface FinalQuotation {
+  material: MaterialOption;
+  estimatedWeightGrams: number;
+  printTimeHours: number;
+  productionCostThb: number;
+  depositCreditedThb: number; // 300 THB
+  remainingBalanceThb: number;
+  slaDays: number;
+  estimatedDeliveryDate: string;
+  affirmationAccepted: boolean;
+  affirmationAcceptedAt?: string;
+}
+
+export interface CashbackPhotoClaim {
+  submitted: boolean;
+  photoUrl?: string;
+  submittedAt?: string;
+  status: 'none' | 'pending' | 'approved' | 'paid' | 'rejected';
+  amountThb: number; // 300 THB
+  adminNote?: string;
+  payoutMethod?: string;
+  payoutAccount?: string;
 }
 
 export interface CustomerOrder {
@@ -136,48 +164,49 @@ export interface CustomerOrder {
   updatedAt: string;
   customerName: string;
   customerEmail: string;
+  customerPhone?: string;
   status: OrderStatus;
-  prompt: string;
-  negativePrompt?: string;
-  style: ArtStyle;
+  
+  // Custom Request Details
+  description: string;
+  referenceImages: string[];
+  dimensionsText?: string;
+  intendedUse?: string;
+  
+  // 300 THB Design Deposit
+  depositAmountThb: number; // 300
+  depositPaid: boolean;
+  depositPaidAt?: string;
+  depositStripePaymentId?: string;
+
+  // 3-Round Artisan Drafting & Feedback
+  currentRevisionRound: number; // 1, 2, or 3
+  maxRevisions: number; // 3
+  revisions: ArtisanRevisionItem[];
+  canRefundDeposit: boolean; // true during round 1 and round 2
+
+  // Final Quotation & Affirmation
+  quotation?: FinalQuotation;
+  
+  // Model & Physical Specs
   modelGeometry: ModelGeometryInfo;
   material: MaterialOption;
   shippingOption: ShippingOption;
   shippingAddress: ShippingAddress;
   pricing: PriceBreakdown;
 
-  // Phase 1: Admin Review & Finalization fields
-  estimatedPrice: number;
-  actualPrice?: number;
-  priceAdjustmentReason?: string;
-  estimatedSlaDeliveryDate: string;
-  actualSlaDeliveryDate?: string;
-  adminApprovalNotes?: string;
-  adminApprovedAt?: string;
-
-  // Re-edit limits (max 3)
-  revisionCount: number;
-  maxRevisionsAllowed: number;
-  revisionHistory: Array<{
-    timestamp: string;
-    prompt: string;
-    style: ArtStyle;
-    materialId: string;
-  }>;
-
   // Courier & Tracking
-  slaGuaranteedDeliveryDate: string; // Active guaranteed SLA deadline
+  slaGuaranteedDeliveryDate: string;
   isSlaMet: boolean;
   trackingNumber?: string;
   trackingCarrier?: string;
   packagingNotes?: string;
 
-  // Phase 3: Customer Receipt Confirmation
-  receiptConfirmation?: CustomerReceiptConfirmation;
-
-  // Refund Management
-  refundRequest?: RefundRequestInfo;
-  adminNotes?: string;
+  // 300 THB Cashback Photo Claim
+  cashbackClaim?: CashbackPhotoClaim;
+  
+  // Internal Admin & Artisan Notes
+  artisanInternalNotes?: string;
 }
 
 export interface ChatMessage {

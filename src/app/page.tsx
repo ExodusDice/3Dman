@@ -78,18 +78,18 @@ export default function HomePage() {
       <section className="py-16 text-center bg-white border-t border-slate-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
-            พร้อมที่จะเปลี่ยนจินตนาการ 3D สู่ชิ้นงานประติมากรรมจริงแล้วหรือยัง?
+            พร้อมที่จะเปลี่ยนจินตนาการ 3D สู่ชิ้นงานจริงแล้วหรือยัง?
           </h2>
           <p className="text-sm text-slate-600 max-w-xl mx-auto">
-            ลองใช้สตูดิโอ Meshy AI ของเราตอนนี้ ปั้นแบบได้ในไม่กี่วินาที หมุนดู 360 องศา และคำนวณราคาตามน้ำหนักและวัสดุจริง
+            ส่งคำขอสั่งทำชิ้นงาน 3D ให้ช่างเขียนแบบได้ทันที มัดจำเพียง 300 บาท (ตรวจแก้ได้ 3 ครั้ง คืนเงินได้ถึงรอบที่ 2)
           </p>
           <div className="pt-2">
             <Link
-              href="/studio"
+              href="/request-print"
               className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white font-bold text-sm shadow-xl shadow-violet-500/25 hover:scale-105 transition-all"
             >
               <Sparkles className="w-4 h-4 text-cyan-200" />
-              <span>เข้าสู่สตูดิโอ 3D AI ได้ทันที</span>
+              <span>ส่งคำขอสั่งทำชิ้นงาน 3D ทันที</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

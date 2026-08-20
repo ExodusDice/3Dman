@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Viewer3D from '@/components/Viewer3D';
-import { Sparkles, ShieldCheck, ArrowRight, Layers, CheckCircle2, Box, Flame } from 'lucide-react';
+import { Sparkles, ShieldCheck, ArrowRight, Layers, CheckCircle2, Box, Flame, Wand2, Gift, RotateCcw } from 'lucide-react';
 
 export default function HeroSection() {
   return (
@@ -18,52 +18,52 @@ export default function HeroSection() {
             {/* Top Pill */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-50 border border-violet-200 text-violet-700 text-xs font-mono font-semibold shadow-sm">
               <Sparkles className="w-3.5 h-3.5 text-violet-600 animate-spin" />
-              <span>Meshy AI 3D Studio & บริการพิมพ์ชิ้นงานมาตรฐานสากล</span>
+              <span>Process Transparency • ช่างปั้นแบบ 3D มืออาชีพ & โรงงานพิมพ์มาตรฐาน</span>
             </div>
 
             {/* Main Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.2]">
-              จาก <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-600 bg-clip-text text-transparent">คำสั่ง AI (Prompt)</span> สู่ งานประติมากรรม 3D จริงถึงมือคุณ
+              สั่งทำชิ้นงาน <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-600 bg-clip-text text-transparent">3D ตามสั่ง</span> ช่างเขียนแบบ ตรวจแก้ได้ 3 ครั้ง
             </h1>
 
             {/* Subtitle */}
             <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed mx-auto lg:mx-0">
-              ปั้นโมเดล 3D ด้วยพลัง Meshy AI เลือกวัสดุเรซิน 8K ความละเอียดสูง คาร์บอนไฟเบอร์ หรือทองสัมฤทธิ์หล่อตัน พร้อมผลิตและจัดส่งถึงหน้าบ้านคุณภายใน <span className="text-emerald-600 font-bold">14 วัน การันตีคืนเงิน 100%</span>
+              เพียงบอกสิ่งที่คุณต้องการ ช่างฝีมือของเราจะปั้นแบบ 3D ให้คุณตรวจร่าง 3 รอบ <span className="text-amber-600 font-bold">(มัดจำ 300฿ คืนเงินได้ถึงรอบที่ 2)</span> พร้อมผลิตด้วยเรซิน 8K หรือคาร์บอนไฟเบอร์ จัดส่งถึงบ้านใน <span className="text-emerald-600 font-bold">14 วัน การันตีคืนเงิน 100%</span>
             </p>
 
-            {/* SLA Trust Badges */}
+            {/* Trust Badges */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2 text-xs text-slate-700 font-medium">
               <div className="flex items-center gap-1.5 bg-emerald-50 px-3.5 py-2 rounded-xl border border-emerald-200 text-emerald-800 shadow-sm">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>รับประกัน SLA 14 วัน หรือคืนเงิน 100%</span>
+                <span>รับประกัน SLA 14 วัน (คืนเงิน 100%)</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 text-slate-800 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-violet-600" />
-                <span>ปรับแต่งแก้แบบได้ 3 ครั้ง</span>
+              <div className="flex items-center gap-1.5 bg-amber-50 px-3.5 py-2 rounded-xl border border-amber-200 text-amber-800 shadow-sm">
+                <RotateCcw className="w-4 h-4 text-amber-600" />
+                <span>มัดจำ 300฿ คืนเงินได้ถึงรอบที่ 2</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 text-slate-800 shadow-sm">
-                <Layers className="w-4 h-4 text-cyan-600" />
-                <span>6 วัสดุเกรดอุตสาหกรรม</span>
+              <div className="flex items-center gap-1.5 bg-emerald-50 px-3.5 py-2 rounded-xl border border-emerald-200 text-emerald-800 shadow-sm">
+                <Gift className="w-4 h-4 text-emerald-600" />
+                <span>รับ Cashback 300฿ เมื่อส่งรูปรีวิว</span>
               </div>
             </div>
 
             {/* CTA Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
               <Link
-                href="/studio"
+                href="/request-print"
                 className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white font-bold text-sm shadow-xl shadow-violet-500/25 hover:scale-105 transition-all flex items-center justify-center gap-2.5 group"
               >
-                <Sparkles className="w-4 h-4 text-cyan-200 group-hover:rotate-12 transition-transform" />
-                <span>เข้าสู่สตูดิโอ 3D AI</span>
+                <Wand2 className="w-4 h-4 text-cyan-200 group-hover:rotate-12 transition-transform" />
+                <span>สั่งทำและพิมพ์ชิ้นงาน 3D</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
 
               <Link
-                href="/gallery"
+                href="/free-stl"
                 className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-800 font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
               >
                 <Box className="w-4 h-4 text-slate-500" />
-                <span>ดูแกลเลอรีผลงานจริง</span>
+                <span>คลังโมเดล STL ฟรี</span>
               </Link>
             </div>
           </div>
@@ -96,17 +96,6 @@ export default function HeroSection() {
                 }}
                 autoRotate={true}
               />
-            </div>
-
-            {/* Floating Live Badge */}
-            <div className="absolute -bottom-4 -left-4 sm:left-4 bg-white/95 backdrop-blur-xl border border-slate-200 p-4 rounded-2xl shadow-xl flex items-center gap-3 text-xs">
-              <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-200 flex items-center justify-center text-violet-600">
-                <Flame className="w-5 h-5 text-amber-500" />
-              </div>
-              <div>
-                <div className="font-bold text-slate-900">บริการผลิตและพิมพ์ชิ้นงานครบวงจร</div>
-                <div className="text-[11px] text-slate-500">สร้างโมเดล ➔ สไลซ์ ➔ พิมพ์ ➔ ขัดแต่ง ➔ จัดส่งถึงบ้าน</div>
-              </div>
             </div>
           </div>
         </div>
