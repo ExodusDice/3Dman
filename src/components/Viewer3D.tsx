@@ -2,8 +2,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MaterialOption, ModelGeometryInfo } from '@/types';
-import { RotateCw, Eye, Sparkles, Box, Sun, Moon, Maximize2, RefreshCw } from 'lucide-react';
+import { RotateCw, Eye, Sparkles, Box, Sun, Moon, Maximize2, RefreshCw, Layers } from 'lucide-react';
 
 interface Viewer3DProps {
   geometryInfo?: ModelGeometryInfo;
@@ -54,7 +55,9 @@ export default function Viewer3D({
   const [autoRotate, setAutoRotate] = useState(initialAutoRotate);
   const [theme, setTheme] = useState<'studio' | 'cyberpunk' | 'warm' | 'dark'>(initialTheme);
   const [showDimensions, setShowDimensions] = useState(true);
-  const [rotationSpeed, setRotationSpeed] = useState(0.008);
+  const [useRealPbrTexture, setUseRealPbrTexture] = useState(true);
+  const [isLoadingGlb, setIsLoadingGlb] = useState(false);
+  const [polyCount, setPolyCount] = useState(geometryInfo.triangleCount || 84000);
 
   // Mouse drag orbit state
   const isDraggingRef = useRef(false);
@@ -128,7 +131,7 @@ export default function Viewer3D({
       animationFrameId = requestAnimationFrame(animate);
 
       if (meshGroupRef.current && autoRotate && !isDraggingRef.current) {
-        meshGroupRef.current.rotation.y += rotationSpeed;
+        meshGroupRef.current.rotation.y += 0.008;
       }
 
       renderer.render(scene, camera);
@@ -161,7 +164,7 @@ export default function Viewer3D({
     }
   }, [theme]);
 
-  // Re-build 3D Model Geometry & Material
+  // Re-build or Load 3D Model (GLB or Procedural)
   useEffect(() => {
     if (!meshGroupRef.current || !sceneRef.current) return;
 
@@ -183,23 +186,99 @@ export default function Viewer3D({
       threeMaterial.emissiveIntensity = 0.35;
     }
 
-    // Procedural sculpture generation based on shape
-    const modelMesh = createProceduralMesh(geometryInfo.shape, threeMaterial);
-    modelMesh.castShadow = true;
-    modelMesh.receiveShadow = true;
-    group.add(modelMesh);
+    // Check if we have a real Meshy GLB URL
+    if (geometryInfo.glbUrl) {
+      setIsLoadingGlb(true);
+      const loader = new GLTFLoader();
 
-    // Bounding box helper
-    if (boundingBoxHelperRef.current && sceneRef.current) {
-      sceneRef.current.remove(boundingBoxHelperRef.current);
-    }
+      loader.load(
+        geometryInfo.glbUrl,
+        (gltf) => {
+          setIsLoadingGlb(false);
+          const loadedModel = gltf.scene;
 
-    if (showDimensions) {
-      const boxHelper = new THREE.BoxHelper(group, 0x6366f1);
-      sceneRef.current.add(boxHelper);
-      boundingBoxHelperRef.current = boxHelper;
+          let calculatedPolys = 0;
+
+          loadedModel.traverse((child) => {
+            if ((child as THREE.Mesh).isMesh) {
+              const mesh = child as THREE.Mesh;
+              mesh.castShadow = true;
+              mesh.receiveShadow = true;
+
+              if (mesh.geometry) {
+                const count = mesh.geometry.index
+                  ? mesh.geometry.index.count / 3
+                  : mesh.geometry.attributes.position.count / 3;
+                calculatedPolys += Math.round(count);
+              }
+
+              if (!useRealPbrTexture || wireframe) {
+                mesh.material = threeMaterial;
+              }
+            }
+          });
+
+          setPolyCount(calculatedPolys > 0 ? calculatedPolys : 124000);
+
+          // Calculate bounding box and center/scale model nicely on pedestal
+          const bbox = new THREE.Box3().setFromObject(loadedModel);
+          const size = new THREE.Vector3();
+          bbox.getSize(size);
+          const center = new THREE.Vector3();
+          bbox.getCenter(center);
+
+          // Normalization scale to height ~2.4 units
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const scale = maxDim > 0 ? 2.4 / maxDim : 1;
+          loadedModel.scale.set(scale, scale, scale);
+
+          // Center on pedestal
+          loadedModel.position.x = -center.x * scale;
+          loadedModel.position.y = -bbox.min.y * scale - 1.4;
+          loadedModel.position.z = -center.z * scale;
+
+          group.add(loadedModel);
+
+          // Update bounding box helper
+          if (boundingBoxHelperRef.current && sceneRef.current) {
+            sceneRef.current.remove(boundingBoxHelperRef.current);
+          }
+          if (showDimensions) {
+            const boxHelper = new THREE.BoxHelper(group, 0x6366f1);
+            sceneRef.current.add(boxHelper);
+            boundingBoxHelperRef.current = boxHelper;
+          }
+        },
+        undefined,
+        (error) => {
+          console.warn('GLTFLoader error, falling back to procedural mesh:', error);
+          setIsLoadingGlb(false);
+          const modelMesh = createProceduralMesh(geometryInfo.shape, threeMaterial);
+          modelMesh.castShadow = true;
+          modelMesh.receiveShadow = true;
+          group.add(modelMesh);
+        }
+      );
+    } else {
+      // Procedural sculpture generation based on shape
+      const modelMesh = createProceduralMesh(geometryInfo.shape, threeMaterial);
+      modelMesh.castShadow = true;
+      modelMesh.receiveShadow = true;
+      group.add(modelMesh);
+      setPolyCount(geometryInfo.triangleCount || 84000);
+
+      // Bounding box helper
+      if (boundingBoxHelperRef.current && sceneRef.current) {
+        sceneRef.current.remove(boundingBoxHelperRef.current);
+      }
+
+      if (showDimensions) {
+        const boxHelper = new THREE.BoxHelper(group, 0x6366f1);
+        sceneRef.current.add(boxHelper);
+        boundingBoxHelperRef.current = boxHelper;
+      }
     }
-  }, [geometryInfo, material, wireframe, showDimensions]);
+  }, [geometryInfo, material, wireframe, showDimensions, useRealPbrTexture]);
 
   // Orbit drag handlers
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -215,7 +294,6 @@ export default function Viewer3D({
 
     meshGroupRef.current.rotation.y += deltaX * 0.01;
     meshGroupRef.current.rotation.x += deltaY * 0.01;
-
     meshGroupRef.current.rotation.x = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, meshGroupRef.current.rotation.x));
 
     previousMousePositionRef.current = { x: e.clientX, y: e.clientY };
@@ -250,12 +328,20 @@ export default function Viewer3D({
         onWheel={handleWheel}
       />
 
+      {/* Loading Overlay */}
+      {isLoadingGlb && (
+        <div className="absolute inset-0 z-20 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-2">
+          <RefreshCw className="w-8 h-8 text-violet-600 animate-spin" />
+          <span className="text-xs font-mono font-bold text-slate-900">กำลังดาวน์โหลด & เรนเดอร์โมเดล 3D GLB...</span>
+        </div>
+      )}
+
       {/* Top Floating Overlay Badge */}
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-slate-200 text-xs text-slate-800 shadow-sm">
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
         <span className="font-mono font-medium">360° Real-time 3D Engine</span>
         <span className="text-slate-300">•</span>
-        <span className="text-violet-600 font-mono font-bold">{(geometryInfo.triangleCount || 64000).toLocaleString()} polys</span>
+        <span className="text-violet-600 font-mono font-bold">{polyCount.toLocaleString()} polys</span>
       </div>
 
       {/* Bounding Dimensions Ruler Tag */}
@@ -366,7 +452,6 @@ function createProceduralMesh(shape: string, material: THREE.Material): THREE.Me
 
   switch (shape) {
     case 'cyberpunk_helmet': {
-      const parent = new THREE.Group();
       const baseGeo = new THREE.DodecahedronGeometry(1.4, 2);
       const pos = baseGeo.attributes.position;
       for (let i = 0; i < pos.count; i++) {
@@ -396,7 +481,7 @@ function createProceduralMesh(shape: string, material: THREE.Material): THREE.Me
       geometry = new THREE.IcosahedronGeometry(1.3, 4);
       break;
     }
-    case 'anime_cartoon': {
+    case 'cute_mascot': {
       geometry = new THREE.SphereGeometry(1.2, 32, 32);
       break;
     }

@@ -1,29 +1,67 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArtStyle, MaterialOption, ModelGeometryInfo, ShippingOption } from '@/types';
 import { AVAILABLE_MATERIALS, AVAILABLE_SHIPPING_OPTIONS } from '@/lib/materials';
 import { calculateProfitPrice } from '@/lib/pricing';
-import { generate3DModel } from '@/lib/meshy';
 import Viewer3D from '@/components/Viewer3D';
 import PriceEstimator from '@/components/Studio/PriceEstimator';
 import CheckoutModal from '@/components/CheckoutModal';
-import { Sparkles, Wand2, RefreshCw, Layers, ShieldCheck, Box, Sliders, AlertCircle, CheckCircle, Flame } from 'lucide-react';
+import { 
+  Sparkles, 
+  Wand2, 
+  RefreshCw, 
+  Layers, 
+  ShieldCheck, 
+  Box, 
+  Sliders, 
+  AlertCircle, 
+  CheckCircle, 
+  Flame, 
+  Image as ImageIcon, 
+  UploadCloud, 
+  Key, 
+  X, 
+  ExternalLink, 
+  FileText, 
+  HelpCircle,
+  Check
+} from 'lucide-react';
 
 const SUGGESTED_PROMPTS = [
+  { text: 'Cyberpunk samurai oni mask with glowing geometric horns and respirator tubes', style: 'cyberpunk' as ArtStyle },
   { text: 'หน้ากากนักรบไซเบอร์พังค์ โอนิ มีเขาเหลี่ยมเรขาคณิตและท่อหายใจเรืองแสงนีออน', style: 'cyberpunk' as ArtStyle },
-  { text: 'มังกรสวรรค์ในตำนานพันรอบลูกแก้วคริสตัล ลำตัวมีเกล็ดคมชัดและดวงตาสง่างาม', style: 'realistic' as ArtStyle },
-  { text: 'รูปปั้นครึ่งตัวจักรพรรดิโรมัน มาร์คุส ออเรลิอุส สไตล์ทองสัมฤทธิ์โบราณพิพิธภัณฑ์', style: 'ancient_bronze' as ArtStyle },
-  { text: 'หุ่นยนต์เมคาทหารเกราะหนักไซไฟ พร้อมกระบอกปืนใหญ่ที่หัวไหล่และเตาปฏิกรณ์พลังงาน', style: 'sci_fi_mech' as ArtStyle },
-  { text: 'แจกันรูปทรงเกลียวพารามิเตอร์ Voronoi เส้นสายออร์แกนิกสลับซับซ้อน', style: 'voronoi_art' as ArtStyle },
-  { text: 'มาสคอตจิ้งจอกไซเบอร์ตัวจิ๋ว (Chibi) สวมหูฟังเมคานิกส์ขนาดใหญ่', style: 'anime_cartoon' as ArtStyle },
+  { text: 'Ancient celestial dragon coiled around crystal orb, sharp scales and museum finish', style: 'realistic' as ArtStyle },
+  { text: 'Roman Emperor Marcus Aurelius bronze classical bust portrait', style: 'ancient_bronze' as ArtStyle },
+  { text: 'Sci-fi heavy mech assault robot with shoulder cannon and power reactor', style: 'sci_fi_mech' as ArtStyle },
+  { text: 'Chibi cute cyber fox mascot wearing large mechanical headphones', style: 'anime_cartoon' as ArtStyle },
+  { text: 'Organic Voronoi parametric twisted art vase', style: 'voronoi_art' as ArtStyle },
 ];
 
 export default function AIStudio() {
-  const [prompt, setPrompt] = useState('หน้ากากนักรบไซเบอร์พังค์ โอนิ มีเขาเหลี่ยมเรขาคณิตและท่อหายใจเรืองแสงนีออน');
+  // Mode: Text-to-3D or Image-to-3D
+  const [studioMode, setStudioMode] = useState<'text' | 'image'>('text');
+
+  // Text Prompt & Style
+  const [prompt, setPrompt] = useState('Cyberpunk samurai oni mask with glowing geometric horns and respirator tubes');
+  const [negativePrompt, setNegativePrompt] = useState('low quality, low resolution, messy mesh, non-manifold');
   const [artStyle, setArtStyle] = useState<ArtStyle>('cyberpunk');
+
+  // Image Upload state
+  const [uploadedImageBase64, setUploadedImageBase64] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Meshy API Key management
+  const [apiKey, setApiKey] = useState<string>('');
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [savedKeyNotification, setSavedKeyNotification] = useState(false);
+
+  // Generation & Task Progress
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(100);
+  const [statusMessage, setStatusMessage] = useState<string>('');
+  const [taskId, setTaskId] = useState<string | null>(null);
 
   // Model geometry & scale
   const [geometryInfo, setGeometryInfo] = useState<ModelGeometryInfo>({
@@ -47,6 +85,50 @@ export default function AIStudio() {
   // Checkout modal state
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
+  // Load saved API key on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('3dman_meshy_api_key');
+    if (saved) {
+      setApiKey(saved);
+    }
+  }, []);
+
+  const handleSaveApiKey = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem('3dman_meshy_api_key', apiKey.trim());
+    setSavedKeyNotification(true);
+    setTimeout(() => setSavedKeyNotification(false), 2500);
+    setIsApiKeyModalOpen(false);
+  };
+
+  // Image Upload Handler
+  const handleImageFile = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      alert('กรุณาอัปโหลดไฟล์รูปภาพ เช่น PNG, JPG หรือ WEBP (Please upload an image file)');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('ขนาดไฟล์รูปภาพต้องไม่เกิน 10MB (Image size must be under 10MB)');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64 = e.target?.result as string;
+      setUploadedImageBase64(base64);
+      setUploadedFileName(file.name);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleImageFile(e.dataTransfer.files[0]);
+    }
+  };
+
   // Calculate live profit price
   const pricing = calculateProfitPrice({
     widthCm: geometryInfo.widthCm,
@@ -57,10 +139,19 @@ export default function AIStudio() {
     shippingOption: selectedShipping,
   });
 
-  // Handle generation / re-edit
+  // Handle Generation with Meshy AI & Task Polling
   const handleGenerate = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!prompt.trim() || isGenerating) return;
+
+    if (studioMode === 'text' && !prompt.trim()) {
+      alert('กรุณากรอกคำสั่งชิ้นงาน 3D (Please enter a prompt)');
+      return;
+    }
+
+    if (studioMode === 'image' && !uploadedImageBase64) {
+      alert('กรุณาอัปโหลดรูปภาพที่ต้องการแปลงเป็น 3D (Please upload an image)');
+      return;
+    }
 
     if (revisionCount >= maxRevisions) {
       alert('คุณใช้สิทธิ์ปรับแต่งครบ 3 ครั้งแล้วสำหรับรอบนี้ กรุณายืนยันคำสั่งซื้อ หรือเริ่มรอบใหม่');
@@ -68,36 +159,96 @@ export default function AIStudio() {
     }
 
     setIsGenerating(true);
-    setGenerationProgress(20);
-
-    const progressTimer = setInterval(() => {
-      setGenerationProgress((p) => Math.min(p + 25, 90));
-    }, 300);
+    setGenerationProgress(10);
+    setStatusMessage(studioMode === 'image' ? 'กำลังอัปโหลดรูปภาพไปยัง Meshy AI...' : 'กำลังส่งคำสั่งปั้นโมเดลไปยัง Meshy AI...');
 
     try {
-      const result = await generate3DModel({
-        prompt: prompt.trim(),
-        style: artStyle,
+      const response = await fetch('/api/meshy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: studioMode === 'image' ? 'image-to-3d' : 'text-to-3d',
+          prompt: prompt.trim(),
+          imageUrl: uploadedImageBase64 || undefined,
+          negativePrompt,
+          style: artStyle,
+          apiKey: apiKey.trim() || undefined,
+        }),
       });
 
-      clearInterval(progressTimer);
-      setGenerationProgress(100);
+      const initialResult = await response.json();
 
-      if (result.success) {
+      if (!initialResult.success) {
+        throw new Error(initialResult.error || 'Failed to initialize Meshy AI task');
+      }
+
+      const activeTaskId = initialResult.taskId;
+      setTaskId(activeTaskId);
+
+      // If simulated/local task, finish immediately
+      if (activeTaskId.startsWith('meshy_local_')) {
+        setGenerationProgress(100);
+        setStatusMessage('เรนเดอร์โมเดล 3D สำเร็จ!');
         setGeometryInfo((prev) => ({
           ...prev,
-          shape: result.modelGeometry.shape,
-          triangleCount: result.modelGeometry.triangleCount,
+          shape: initialResult.modelGeometry.shape,
+          glbUrl: undefined,
+          previewImageUrl: uploadedImageBase64 || undefined,
+          triangleCount: initialResult.modelGeometry.triangleCount,
         }));
-
         setRevisionCount((c) => c + 1);
         setRevisionHistory((prev) => [
           ...prev,
-          { prompt: prompt.trim(), style: artStyle, timestamp: new Date().toLocaleTimeString('th-TH') },
+          { prompt: studioMode === 'image' ? `Image: ${uploadedFileName}` : prompt.trim(), style: artStyle, timestamp: new Date().toLocaleTimeString('th-TH') },
         ]);
+        setIsGenerating(false);
+        return;
       }
-    } catch (err) {
-      console.error('Generation error:', err);
+
+      // Live Meshy Polling Loop
+      let isDone = false;
+      let pollAttempts = 0;
+      const maxAttempts = 80;
+
+      while (!isDone && pollAttempts < maxAttempts) {
+        pollAttempts++;
+        await new Promise((r) => setTimeout(r, 2500));
+
+        const pollRes = await fetch(`/api/meshy?taskId=${activeTaskId}&taskType=${studioMode === 'image' ? 'image-to-3d' : 'text-to-3d'}&apiKey=${encodeURIComponent(apiKey.trim())}`);
+        if (!pollRes.ok) continue;
+
+        const pollData = await pollRes.json();
+
+        if (pollData.status === 'IN_PROGRESS' || pollData.status === 'PENDING') {
+          const currentProgress = Math.max(15, pollData.progress || Math.min(95, pollAttempts * 4));
+          setGenerationProgress(currentProgress);
+          setStatusMessage(`Meshy AI กำลังปั้น 3D Mesh (${currentProgress}%)...`);
+        } else if (pollData.status === 'SUCCEEDED') {
+          isDone = true;
+          setGenerationProgress(100);
+          setStatusMessage('ดาวน์โหลดและเรนเดอร์โมเดล 3D GLB สำเร็จ!');
+
+          setGeometryInfo((prev) => ({
+            ...prev,
+            shape: 'custom_glb',
+            glbUrl: pollData.glbUrl,
+            previewImageUrl: pollData.thumbnailUrl || uploadedImageBase64 || undefined,
+            triangleCount: pollData.modelGeometry?.triangleCount || 142000,
+          }));
+
+          setRevisionCount((c) => c + 1);
+          setRevisionHistory((prev) => [
+            ...prev,
+            { prompt: studioMode === 'image' ? `Image: ${uploadedFileName}` : prompt.trim(), style: artStyle, timestamp: new Date().toLocaleTimeString('th-TH') },
+          ]);
+        } else if (pollData.status === 'FAILED') {
+          isDone = true;
+          alert(`Meshy AI ประมวลผลไม่สำเร็จ: ${pollData.errorMessage || 'เกิดข้อผิดพลาดในการสร้างโมเดล'}`);
+        }
+      }
+    } catch (err: any) {
+      console.error('Meshy generation error:', err);
+      alert(`เกิดข้อผิดพลาดในการเชื่อมต่อ Meshy AI: ${err.message || 'กรุณาลองใหม่อีกครั้ง'}`);
     } finally {
       setIsGenerating(false);
     }
@@ -120,15 +271,32 @@ export default function AIStudio() {
         <div className="absolute top-0 right-0 w-96 h-96 bg-violet-100/50 rounded-full blur-3xl pointer-events-none" />
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 border border-violet-200 text-violet-800 text-xs font-mono font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-violet-600" />
-              <span>บริการครบวงจร: AI ปั้นโมเดล 3D ➔ พิมพ์ชิ้นงานจริง ➔ ส่งถึงบ้าน</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 border border-violet-200 text-violet-800 text-xs font-mono font-semibold">
+                <Sparkles className="w-3.5 h-3.5 text-violet-600" />
+                <span>Meshy AI 3D Studio & Full Fulfillment Service</span>
+              </span>
+
+              {/* Meshy Key Status Badge */}
+              <button
+                onClick={() => setIsApiKeyModalOpen(true)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold transition-all border ${
+                  apiKey
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                    : 'bg-slate-100 text-slate-700 border-slate-300 hover:border-violet-400'
+                }`}
+                title="ตั้งค่า Meshy API Key ของคุณ"
+              >
+                <Key className="w-3 h-3 text-violet-600" />
+                <span>{apiKey ? 'Meshy API: เชื่อมต่อแล้ว (Connected)' : 'ตั้งค่า Meshy API Key'}</span>
+              </button>
             </div>
+
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              สร้างโมเดล 3D และสั่งพิมพ์ชิ้นงานจริงของคุณ
+              สร้างโมเดล 3D ด้วย Meshy AI (Text & Image to 3D)
             </h1>
             <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
-              เพียงพิมพ์อธิบายชิ้นงานที่ต้องการ Meshy AI จะขึ้นรูปทรง 3D จากนั้นฟาร์มเครื่องพิมพ์ของเราจะผลิตด้วยเรซินความละเอียดสูง หรือคาร์บอนไฟเบอร์ พร้อมจัดส่งถึงบ้านคุณภายใน 14 วัน
+              รองรับทั้งการพิมพ์คำสั่ง (ภาษาไทย & English) หรืออัปโหลดรูปภาพ 2D เพื่อให้ Meshy AI ปั้นเป็นโมเดล 3D แบบเรียลไทม์ พร้อมเลือกวัสดุและสั่งพิมพ์ส่งถึงบ้านใน 14 วัน
             </p>
           </div>
 
@@ -150,12 +318,12 @@ export default function AIStudio() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: AI Prompt & Re-edit Controls (4 cols) */}
         <div className="lg:col-span-4 space-y-6">
-          {/* Prompt Generator Card */}
+          {/* Studio Mode Selector (Text-to-3D vs Image-to-3D) */}
           <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-bold text-base text-slate-900 flex items-center gap-2">
                 <Wand2 className="w-4 h-4 text-violet-600" />
-                <span>สตูดิโอคำสั่ง Meshy AI</span>
+                <span>สตูดิโอ Meshy AI Engine</span>
               </h2>
 
               {/* Revision Badge */}
@@ -168,65 +336,179 @@ export default function AIStudio() {
               </div>
             </div>
 
-            <form onSubmit={handleGenerate} className="space-y-3">
-              <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1.5">
-                  อธิบายรูปร่างชิ้นงาน 3D ที่ต้องการสร้าง:
-                </label>
-                <textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  rows={3}
-                  placeholder="เช่น หน้ากากไซเบอร์พังค์มีเขาเรืองแสง, รูปปั้นโรมันคลาสสิก, หรือ มังกรพันลูกแก้ว..."
-                  className="w-full bg-slate-50 border border-slate-300 focus:border-violet-500 rounded-2xl p-3.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-colors resize-none leading-relaxed shadow-inner"
-                />
-              </div>
+            {/* Mode Switch Tabs */}
+            <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl">
+              <button
+                type="button"
+                onClick={() => setStudioMode('text')}
+                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                  studioMode === 'text'
+                    ? 'bg-white text-violet-700 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>Text to 3D (ข้อความ)</span>
+              </button>
 
-              {/* Art Style Selector */}
-              <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1.5">
-                  เลือกสไตล์และอารมณ์ของชิ้นงาน:
-                </label>
-                <div className="grid grid-cols-2 gap-1.5 text-xs">
-                  {[
-                    { id: 'cyberpunk', name: 'ไซเบอร์พังค์ (Cyberpunk)' },
-                    { id: 'realistic', name: 'สมจริงเสมือนจริง (Realistic)' },
-                    { id: 'ancient_bronze', name: 'ทองสัมฤทธิ์โบราณ (Bronze)' },
-                    { id: 'sculpted_marble', name: 'หินอ่อนแกะสลัก (Marble)' },
-                    { id: 'sci_fi_mech', name: 'หุ่นยนต์เมคาไซไฟ (Mech)' },
-                    { id: 'anime_cartoon', name: 'ฟิกเกอร์อนิเมะ (Anime)' },
-                  ].map((style) => (
-                    <button
-                      key={style.id}
-                      type="button"
-                      onClick={() => setArtStyle(style.id as ArtStyle)}
-                      className={`px-3 py-2 rounded-xl text-left font-medium transition-all ${
-                        artStyle === style.id
-                          ? 'bg-violet-600 text-white shadow-md shadow-violet-500/20 font-bold'
-                          : 'bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200 hover:bg-slate-100'
-                      }`}
-                    >
-                      {style.name}
-                    </button>
-                  ))}
+              <button
+                type="button"
+                onClick={() => setStudioMode('image')}
+                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                  studioMode === 'image'
+                    ? 'bg-white text-cyan-700 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span>Image to 3D (อัปโหลดรูป)</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleGenerate} className="space-y-4">
+              {/* Mode 1: Text-to-3D Input */}
+              {studioMode === 'text' && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1.5">
+                      อธิบายรูปร่างชิ้นงาน 3D (ภาษาไทย หรือ English):
+                    </label>
+                    <textarea
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      rows={3}
+                      placeholder="e.g. Cyberpunk samurai oni mask, Roman bronze bust, dragon coiled around crystal orb..."
+                      className="w-full bg-slate-50 border border-slate-300 focus:border-violet-500 rounded-2xl p-3.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-colors resize-none leading-relaxed shadow-inner"
+                    />
+                  </div>
+
+                  {/* Art Style Selector */}
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1.5">
+                      สไตล์ศิลปะของโมเดล (Art Style):
+                    </label>
+                    <div className="grid grid-cols-2 gap-1.5 text-xs">
+                      {[
+                        { id: 'cyberpunk', name: 'Cyberpunk (ไซเบอร์พังค์)' },
+                        { id: 'realistic', name: 'Realistic (สมจริง)' },
+                        { id: 'ancient_bronze', name: 'Bronze (ทองสัมฤทธิ์)' },
+                        { id: 'sculpted_marble', name: 'Marble (หินอ่อน)' },
+                        { id: 'sci_fi_mech', name: 'Sci-Fi Mech (หุ่นยนต์)' },
+                        { id: 'anime_cartoon', name: 'Anime (ฟิกเกอร์การ์ตูน)' },
+                      ].map((style) => (
+                        <button
+                          key={style.id}
+                          type="button"
+                          onClick={() => setArtStyle(style.id as ArtStyle)}
+                          className={`px-3 py-2 rounded-xl text-left font-medium transition-all ${
+                            artStyle === style.id
+                              ? 'bg-violet-600 text-white shadow-md shadow-violet-500/20 font-bold'
+                              : 'bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          {style.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Mode 2: Image-to-3D Upload */}
+              {studioMode === 'image' && (
+                <div className="space-y-3">
+                  <label className="text-xs font-semibold text-slate-700 block">
+                    อัปโหลดรูปภาพ 2D เพื่อให้ Meshy AI แปลงเป็นโมเดล 3D:
+                  </label>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        handleImageFile(e.target.files[0]);
+                      }
+                    }}
+                    className="hidden"
+                  />
+
+                  {uploadedImageBase64 ? (
+                    <div className="relative rounded-2xl border border-slate-200 bg-slate-50 p-3 flex items-center gap-3">
+                      <img
+                        src={uploadedImageBase64}
+                        alt="Uploaded preview"
+                        className="w-16 h-16 object-cover rounded-xl border border-slate-300"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold text-slate-900 truncate">{uploadedFileName || 'ภาพที่เลือก'}</div>
+                        <div className="text-[11px] text-emerald-600 font-semibold">✓ รูปภาพพร้อมแปลงเป็น 3D</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUploadedImageBase64(null);
+                          setUploadedFileName('');
+                        }}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                        title="ลบรูปภาพ"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-slate-300 hover:border-violet-500 bg-slate-50/70 hover:bg-violet-50/40 rounded-2xl p-6 text-center cursor-pointer transition-colors space-y-2"
+                    >
+                      <UploadCloud className="w-8 h-8 text-violet-500 mx-auto" />
+                      <div className="text-xs font-bold text-slate-800">
+                        คลิกเพื่อเลือกไฟล์รูปภาพ หรือลากรูปมาวางที่นี่
+                      </div>
+                      <p className="text-[11px] text-slate-500">
+                        รองรับ PNG, JPG, WEBP สูงสุด 10MB (ภาพแนวตรง ชัดเจน จะได้โมเดล 3D ที่ดีที่สุด)
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Generation Progress Bar */}
+              {isGenerating && (
+                <div className="bg-violet-50 border border-violet-200 rounded-2xl p-3.5 space-y-2">
+                  <div className="flex justify-between text-xs font-mono">
+                    <span className="text-violet-800 font-bold flex items-center gap-1.5">
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>{statusMessage}</span>
+                    </span>
+                    <span className="text-violet-700 font-bold">{generationProgress}%</span>
+                  </div>
+                  <div className="w-full bg-violet-200 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-violet-600 to-cyan-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${generationProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Generate / Re-edit Button */}
               <button
                 type="submit"
-                disabled={isGenerating || !prompt.trim() || revisionCount >= maxRevisions}
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white font-bold text-xs shadow-md shadow-violet-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                disabled={isGenerating || revisionCount >= maxRevisions}
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white font-bold text-xs shadow-md shadow-violet-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
               >
                 {isGenerating ? (
                   <>
                     <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>AI กำลังประมวลผลโมเดล 3D ({generationProgress}%)...</span>
+                    <span>Meshy AI กำลังปั้น 3D...</span>
                   </>
                 ) : revisionCount === 0 ? (
                   <>
                     <Sparkles className="w-4 h-4" />
-                    <span>สร้างโมเดล 3D เริ่มต้น</span>
+                    <span>สร้างโมเดล 3D (Generate 3D)</span>
                   </>
                 ) : (
                   <>
@@ -237,28 +519,30 @@ export default function AIStudio() {
               </button>
             </form>
 
-            {/* Quick Inspiration Pills */}
-            <div>
-              <div className="text-[11px] font-semibold text-slate-500 mb-2 flex items-center gap-1">
-                <Flame className="w-3.5 h-3.5 text-amber-500" />
-                <span>ตัวอย่างคำสั่งยอดนิยม:</span>
+            {/* Quick Inspiration Prompts */}
+            {studioMode === 'text' && (
+              <div>
+                <div className="text-[11px] font-semibold text-slate-500 mb-2 flex items-center gap-1">
+                  <Flame className="w-3.5 h-3.5 text-amber-500" />
+                  <span>ตัวอย่างคำสั่งแนะนำ (ไทย & English):</span>
+                </div>
+                <div className="space-y-1.5">
+                  {SUGGESTED_PROMPTS.slice(0, 3).map((item, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setPrompt(item.text);
+                        setArtStyle(item.style);
+                      }}
+                      className="w-full text-left text-[11px] text-slate-600 hover:text-violet-700 bg-slate-50 hover:bg-slate-100 p-2.5 rounded-xl border border-slate-200 truncate transition-colors font-medium"
+                    >
+                      "{item.text}"
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="space-y-1.5">
-                {SUGGESTED_PROMPTS.slice(0, 3).map((item, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      setPrompt(item.text);
-                      setArtStyle(item.style);
-                    }}
-                    className="w-full text-left text-[11px] text-slate-600 hover:text-violet-700 bg-slate-50 hover:bg-slate-100 p-2.5 rounded-xl border border-slate-200 truncate transition-colors font-medium"
-                  >
-                    "{item.text}"
-                  </button>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Physical Dimensions & Infill Controls */}
@@ -426,12 +710,77 @@ export default function AIStudio() {
         </div>
       </div>
 
+      {/* Meshy API Key Configuration Modal */}
+      {isApiKeyModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600">
+                  <Key className="w-4 h-4" />
+                </div>
+                <h3 className="font-bold text-sm text-slate-900">ตั้งค่า Meshy AI API Key</h3>
+              </div>
+              <button onClick={() => setIsApiKeyModalOpen(false)} className="text-slate-400 hover:text-slate-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              ใส่ API Key ของบัญชี Meshy AI เพื่อใช้เครดิตเจนโมเดล 3D แบบ Text-to-3D และ Image-to-3D ของคุณโดยตรง:
+            </p>
+
+            <form onSubmit={handleSaveApiKey} className="space-y-3 text-xs">
+              <div>
+                <label className="text-slate-700 font-semibold block mb-1">Meshy API Key (msy_...):</label>
+                <input
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="msy_your_secret_api_key..."
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-900 font-mono focus:outline-none focus:border-violet-500 shadow-sm"
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                <span>ยังไม่มี API Key?</span>
+                <a
+                  href="https://www.meshy.ai/settings/api"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-violet-600 font-semibold hover:underline flex items-center gap-1"
+                >
+                  <span>รับฟรี API Key ที่ Meshy.ai</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsApiKeyModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                >
+                  ปิด
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 text-white font-bold shadow-md shadow-violet-500/20 hover:scale-105 transition-all"
+                >
+                  บันทึก & ใช้งาน
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Checkout Modal */}
       {isCheckoutOpen && (
         <CheckoutModal
           isOpen={isCheckoutOpen}
           onClose={() => setIsCheckoutOpen(false)}
-          prompt={prompt}
+          prompt={studioMode === 'image' ? `Image: ${uploadedFileName}` : prompt}
           artStyle={artStyle}
           geometryInfo={geometryInfo}
           material={selectedMaterial}
