@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Box, Sparkles, ShieldCheck, ShoppingBag, ShieldAlert, MessageSquare, User, Menu, X, Lock, LogIn } from 'lucide-react';
+import { Box, Sparkles, ShieldCheck, ShoppingBag, ShieldAlert, MessageSquare, User, Menu, X, Lock, LogIn, Globe } from 'lucide-react';
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
 
 const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
@@ -24,6 +24,7 @@ export default function Navbar({ onOpenChat, unreadChatCount = 0 }: NavbarProps)
 
   const navLinks = [
     { name: 'สตูดิโอ 3D AI', href: '/studio', icon: Sparkles },
+    { name: 'คลังโมเดล STL ฟรี', href: '/free-stl', icon: Globe },
     { name: 'แกลเลอรีผลงาน', href: '/gallery', icon: Box },
     { name: 'รับประกัน SLA 14 วัน', href: '/sla-guarantee', icon: ShieldCheck },
     { name: 'คำสั่งซื้อของฉัน', href: '/orders', icon: ShoppingBag },
