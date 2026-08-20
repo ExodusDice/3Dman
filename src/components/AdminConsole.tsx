@@ -762,12 +762,25 @@ export default function AdminConsole() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-              <div className="md:col-span-7 h-[360px] bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden shadow-inner">
-                <Viewer3D
-                  geometryInfo={selectedOrder.modelGeometry}
-                  material={selectedOrder.material}
-                  autoRotate={true}
-                />
+              <div className="md:col-span-7 h-[360px] bg-slate-900 rounded-2xl border border-slate-200 overflow-hidden shadow-inner flex items-center justify-center">
+                {selectedOrder.referenceImages && selectedOrder.referenceImages.length > 0 ? (
+                  <img
+                    src={selectedOrder.referenceImages[0]}
+                    alt="Customer Reference"
+                    className="max-h-full max-w-full object-contain"
+                  />
+                ) : selectedOrder.modelGeometry?.glbUrl ? (
+                  <Viewer3D
+                    geometryInfo={selectedOrder.modelGeometry}
+                    material={selectedOrder.material}
+                    autoRotate={true}
+                  />
+                ) : (
+                  <div className="text-center p-6 text-slate-400 space-y-2">
+                    <Box className="w-10 h-10 text-slate-500 mx-auto" />
+                    <p className="text-xs">ลูกค้าไม่ได้แนบรูปภาพอ้างอิง (สั่งทำตามข้อความ)</p>
+                  </div>
+                )}
               </div>
 
               <div className="md:col-span-5 space-y-3 text-xs">

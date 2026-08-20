@@ -26,6 +26,7 @@ export interface GalleryDesignItem {
   createdAt: string;
   isVerifiedPrint: boolean;
   status: OrderStatus;
+  imageUrl: string;
 }
 
 const DATA_DIR = path.join(process.cwd(), '.data');
@@ -563,9 +564,21 @@ export function getGalleryDesigns(): GalleryDesignItem[] {
     const state = o.shippingAddress?.state || 'US';
     const location = `${city}, ${state}`;
 
-    // Extract title from prompt
-    const cleanPrompt = o.prompt.trim();
-    const title = cleanPrompt.length > 35 ? cleanPrompt.slice(0, 35) + '...' : cleanPrompt;
+    const imagesByShape: Record<string, string> = {
+      cyberpunk_helmet: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+      roman_bust: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+      human_bust: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+      dragon_sculpture: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=800&q=80',
+      scifi_mech: 'https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?auto=format&fit=crop&w=800&q=80',
+      voronoi_vase: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
+      cute_mascot: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80',
+    };
+
+    const imageUrl = 
+      o.cashbackClaim?.photoUrl ||
+      o.modelGeometry?.previewImageUrl ||
+      imagesByShape[o.modelGeometry?.shape] ||
+      'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&w=800&q=80';
 
     return {
       id: o.id,
@@ -583,6 +596,7 @@ export function getGalleryDesigns(): GalleryDesignItem[] {
       createdAt: o.createdAt,
       isVerifiedPrint: true,
       status: o.status,
+      imageUrl,
     };
   });
 }

@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { GalleryDesignItem } from '@/lib/db';
-import Viewer3D from '@/components/Viewer3D';
-import { Star, ShieldCheck, Box, Sparkles, CheckCircle2, User, ArrowRight, Search, Layers, RefreshCw, Check } from 'lucide-react';
+import { Star, ShieldCheck, Box, Sparkles, CheckCircle2, User, ArrowRight, Search, Layers, RefreshCw, Check, Wand2 } from 'lucide-react';
 
 export default function GalleryShowcase() {
   const [designs, setDesigns] = useState<GalleryDesignItem[]>([]);
@@ -55,10 +54,10 @@ export default function GalleryShowcase() {
             <span>คลังผลงานสั่งพิมพ์จริงของลูกค้า</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            แกลเลอรีโมเดล 3D และชิ้นงานจริงที่จัดส่งแล้ว
+            แกลเลอรีผลงานชิ้นงาน 3D จริงที่จัดส่งแล้ว
           </h2>
           <p className="text-sm text-slate-600">
-            ทุกผลงานที่สั่งทำผ่าน 3DMan จะถูกบันทึกและจัดเก็บไว้ที่นี่ ท่านสามารถหมุนชมแบบ 360 องศา ดูวัสดุ และอ่านรีวิวจากผู้สั่งซื้อจริง
+            ทุกผลงานที่สั่งทำผ่านช่างฝีมือ 3DMan จะถูกบันทึกและจัดเก็บไว้ที่นี่ ท่านสามารถชมภาพถ่ายผลงานจริง ดูวัสดุ และอ่านรีวิวจากผู้สั่งซื้อ
           </p>
         </div>
 
@@ -119,7 +118,7 @@ export default function GalleryShowcase() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Active 3D Model 360 View (6 cols) */}
+            {/* Active Photograph Showcase (6 cols) */}
             <div className="lg:col-span-6 space-y-4">
               {selectedDesign ? (
                 <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
@@ -143,12 +142,17 @@ export default function GalleryShowcase() {
                     </span>
                   </div>
 
-                  <div className="h-[380px] bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-inner">
-                    <Viewer3D
-                      geometryInfo={selectedDesign.modelGeometry}
-                      material={selectedDesign.material}
-                      autoRotate={true}
+                  {/* Real Photo Container */}
+                  <div className="h-[360px] bg-slate-900 rounded-2xl border border-slate-200 overflow-hidden shadow-inner relative group">
+                    <img
+                      src={selectedDesign.imageUrl}
+                      alt={selectedDesign.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
+                    <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md px-3 py-1 rounded-xl text-white text-[11px] font-mono font-bold flex items-center gap-1.5 border border-white/10">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>ภาพถ่ายสินค้าจริงจัดส่งถึงมือลูกค้า</span>
+                    </div>
                   </div>
 
                   {/* Customer Review & Location Card */}
@@ -180,17 +184,17 @@ export default function GalleryShowcase() {
                     </div>
                   </div>
 
-                  {/* Remix in Studio CTA */}
+                  {/* Order this style CTA */}
                   <Link
-                    href="/studio"
+                    href={`/request-print?prompt=${encodeURIComponent(selectedDesign.title)}`}
                     className="w-full py-3 rounded-2xl bg-gradient-to-r from-violet-600 to-cyan-600 text-white font-bold text-xs shadow-md shadow-violet-500/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
                   >
-                    <Sparkles className="w-4 h-4 text-cyan-200" />
-                    <span>นำไอเดียนี้ไปต่อยอดในสตูดิโอ 3D AI</span>
+                    <Wand2 className="w-4 h-4 text-cyan-200" />
+                    <span>สั่งทำชิ้นงาน 3D สไตล์นี้</span>
                   </Link>
                 </div>
               ) : (
-                <div className="p-8 text-center text-slate-400">เลือกชิ้นงานเพื่อหมุนดูแบบ 360 องศา</div>
+                <div className="p-8 text-center text-slate-400">เลือกชิ้นงานเพื่อชมรูปภาพรายละเอียด</div>
               )}
             </div>
 
@@ -207,43 +211,35 @@ export default function GalleryShowcase() {
                     <button
                       key={item.id}
                       onClick={() => setSelectedDesign(item)}
-                      className={`w-full text-left p-4 rounded-2xl border transition-all ${
+                      className={`w-full text-left p-4 rounded-2xl border transition-all flex gap-4 items-center ${
                         isSelected
                           ? 'bg-violet-50/80 border-violet-500 shadow-md ring-1 ring-violet-500'
                           : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                       }`}
                     >
-                      <div className="flex justify-between items-start mb-1.5">
-                        <div>
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold">
-                              ✓ ชิ้นงานผลิตจริง
-                            </span>
-                            <span className="text-[10px] text-slate-400 font-mono">
-                              #{item.orderNumber}
-                            </span>
-                          </div>
-                          <h4 className="font-bold text-sm text-slate-900">{item.title}</h4>
-                          <div className="text-[11px] text-violet-700 font-mono mt-0.5">{item.specs}</div>
-                        </div>
-
-                        <div className="flex items-center gap-0.5 text-amber-500">
-                          {[...Array(item.rating || 5)].map((_, i) => (
-                            <Star key={i} className="w-3 h-3 fill-amber-400" />
-                          ))}
-                        </div>
+                      <div className="w-20 h-20 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200">
+                        <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
                       </div>
 
-                      <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                        "{item.prompt}"
-                      </p>
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-bold text-sm text-slate-900 truncate">{item.title}</h4>
+                          <div className="flex items-center gap-0.5 text-amber-500 flex-shrink-0 ml-2">
+                            {[...Array(item.rating || 5)].map((_, i) => (
+                              <Star key={i} className="w-3 h-3 fill-amber-400" />
+                            ))}
+                          </div>
+                        </div>
 
-                      <div className="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                        <span className="text-slate-500 font-medium">{item.customerName} • {item.customerLocation}</span>
-                        <span className="text-violet-600 font-semibold flex items-center gap-1">
-                          <span>หมุนดู 360°</span>
-                          <ArrowRight className="w-3 h-3" />
-                        </span>
+                        <div className="text-[11px] text-violet-700 font-mono">{item.specs}</div>
+                        <p className="text-xs text-slate-500 line-clamp-1">"{item.prompt}"</p>
+
+                        <div className="text-[10px] text-slate-400 pt-0.5 flex justify-between items-center">
+                          <span>{item.customerName} ({item.customerLocation})</span>
+                          <span className="text-violet-600 font-bold flex items-center gap-0.5">
+                            <span>ดูรูป ➔</span>
+                          </span>
+                        </div>
                       </div>
                     </button>
                   );

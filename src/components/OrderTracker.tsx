@@ -297,27 +297,58 @@ export default function OrderTracker({ order: initialOrder, onOpenChat }: OrderT
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Revisions, Refund, Quotation & 3D Canvas (8 cols) */}
+        {/* Left Column (8 cols) */}
         <div className="lg:col-span-8 space-y-6">
-          {/* 3D Interactive Model Preview */}
-          <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
+          {/* Customer Reference & Draft Design Showcase */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-bold text-base text-slate-900 flex items-center gap-2">
-                <Box className="w-5 h-5 text-violet-600" />
-                <span>ตัวอย่างชิ้นงาน 3D (360° Real-Time Viewer)</span>
+                <Camera className="w-5 h-5 text-violet-600" />
+                <span>ภาพอ้างอิง & แบบร่างชิ้นงาน 3D (Design & Reference Specs)</span>
               </h2>
               <span className="text-xs text-slate-500 font-mono">
-                {order.dimensionsText || 'สูง 15 ซม.'}
+                {order.dimensionsText || 'ขนาดมาตรฐานตามสั่ง'}
               </span>
             </div>
 
-            <div className="h-[420px] rounded-2xl overflow-hidden border border-slate-200 bg-slate-50">
-              <Viewer3D
-                geometryInfo={order.modelGeometry}
-                material={order.material}
-                autoRotate={true}
-              />
-            </div>
+            {order.modelGeometry?.glbUrl ? (
+              <div className="h-[420px] rounded-2xl overflow-hidden border border-slate-200 bg-slate-50">
+                <Viewer3D
+                  geometryInfo={order.modelGeometry}
+                  material={order.material}
+                  autoRotate={true}
+                />
+              </div>
+            ) : order.referenceImages && order.referenceImages.length > 0 ? (
+              <div className="space-y-3">
+                <div className="h-[360px] rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 flex items-center justify-center">
+                  <img
+                    src={order.referenceImages[0]}
+                    alt="Reference Design"
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+                {order.referenceImages.length > 1 && (
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {order.referenceImages.map((img, i) => (
+                      <div key={i} className="w-16 h-16 rounded-xl border border-slate-200 overflow-hidden flex-shrink-0">
+                        <img src={img} alt={`Ref ${i+1}`} className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center space-y-2">
+                <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600 mx-auto">
+                  <FileText className="w-6 h-6" />
+                </div>
+                <div className="font-bold text-sm text-slate-900">รายละเอียดคำสั่งสั่งทำ:</div>
+                <p className="text-xs text-slate-600 max-w-md mx-auto italic">
+                  "{order.description}"
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Artisan Drafting & 3-Round Revision Card */}
