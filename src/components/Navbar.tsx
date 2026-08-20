@@ -50,7 +50,7 @@ export default function Navbar({ onOpenChat, unreadChatCount = 0 }: NavbarProps)
                 THAILAND
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 hidden sm:block">AI ปั้นแบบ 3D & ผลิตพิมพ์ชิ้นงานจริงครบวงจร</p>
+            <p className="text-[11px] text-slate-500 hidden sm:block">สั่งทำชิ้นงาน 3D & ผลิตพิมพ์ครบวงจร</p>
           </div>
         </Link>
 
