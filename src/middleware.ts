@@ -10,7 +10,8 @@ const isRealClerkKey =
 
 const isPublicRoute = createRouteMatcher([
   '/',
-  '/studio(.*)',
+  '/request-print(.*)',
+  '/free-stl(.*)',
   '/gallery(.*)',
   '/sla-guarantee(.*)',
   '/orders(.*)',

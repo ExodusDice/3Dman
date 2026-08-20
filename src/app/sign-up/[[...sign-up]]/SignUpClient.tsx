@@ -45,11 +45,11 @@ export default function SignUpClient() {
 
         <div className="space-y-3 pt-2">
           <Link
-            href="/studio"
+            href="/request-print"
             className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-600 text-white font-bold text-xs shadow-md shadow-violet-500/20 hover:scale-105 transition-all flex items-center justify-center gap-2"
           >
             <Sparkles className="w-4 h-4" />
-            <span>เริ่มต้นใช้งานสตูดิโอ 3D ได้ทันที</span>
+            <span>เริ่มต้นส่งคำขอสั่งทำ 3D ได้ทันที</span>
           </Link>
         </div>
       </div>

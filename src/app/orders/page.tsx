@@ -44,11 +44,11 @@ export default function OrdersPage() {
         </div>
 
         <Link
-          href="/studio"
+          href="/request-print"
           className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-violet-600 to-cyan-600 text-white font-bold text-xs shadow-md shadow-violet-500/20 hover:scale-105 transition-all flex items-center gap-2"
         >
           <Box className="w-4 h-4" />
-          <span>สั่งพิมพ์โมเดล 3D ชิ้นใหม่</span>
+          <span>ส่งคำขอสั่งทำ 3D ชิ้นใหม่</span>
         </Link>
       </div>
 
@@ -63,15 +63,15 @@ export default function OrdersPage() {
           <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 mx-auto">
             <ShoppingBag className="w-8 h-8" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900">ยังไม่มีรายการสั่งพิมพ์</h3>
+          <h3 className="text-lg font-bold text-slate-900">ยังไม่มีรายการสั่งทำ</h3>
           <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
-            เริ่มต้นสร้างโมเดล 3D ชิ้นแรกของคุณด้วย Meshy AI และสั่งพิมพ์ชิ้นงานจริงได้แล้ววันนี้
+            ส่งคำขอสั่งทำชิ้นงาน 3D ให้ช่างเขียนแบบเฉพาะคุณได้แล้ววันนี้ มัดจำเริ่มต้นเพียง 300 บาท
           </p>
           <Link
-            href="/studio"
+            href="/request-print"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs transition-all shadow-md"
           >
-            <span>เข้าสู่สตูดิโอ 3D AI</span>
+            <span>ส่งคำขอสั่งทำชิ้นงาน 3D</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

@@ -93,11 +93,11 @@ export default function FreeSTLLibrary() {
             </div>
 
             <Link
-              href="/studio"
+              href="/request-print"
               className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-sm shadow-lg whitespace-nowrap flex items-center justify-center gap-2 transition-transform hover:scale-105"
             >
-              <Sparkles className="w-4 h-4 text-slate-950" />
-              <span>ปั้นแบบ 3D ด้วย AI</span>
+              <Wand2 className="w-4 h-4 text-slate-950" />
+              <span>สั่งทำชิ้นงาน 3D</span>
             </Link>
           </div>
         </div>
@@ -274,11 +274,11 @@ export default function FreeSTLLibrary() {
                 {/* Action Buttons */}
                 <div className="space-y-2 pt-1">
                   <Link
-                    href={`/studio?prompt=${encodeURIComponent(model.title)}&style=cyberpunk`}
+                    href={`/request-print?prompt=${encodeURIComponent(model.title)}`}
                     className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white font-bold text-xs shadow-md shadow-violet-500/20 flex items-center justify-center gap-1.5 transition-transform hover:scale-[1.02]"
                   >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>สั่งพิมพ์ชิ้นนี้ (เปิดใน Studio)</span>
+                    <Wand2 className="w-3.5 h-3.5" />
+                    <span>สั่งพิมพ์ชิ้นนี้ (ส่งคำขอช่าง)</span>
                   </Link>
 
                   <a
@@ -339,17 +339,17 @@ export default function FreeSTLLibrary() {
               มีไฟล์ STL ของตัวเองแล้ว ต้องการสั่งพิมพ์?
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              คุณสามารถอัปโหลดไฟล์ STL หรือรูปภาพคอนเซปต์เข้าสู่สตูดิโอของเราเพื่อประเมินราคาและสั่งพิมพ์ด้วยเรซิน 8K ได้ทันที
+              คุณสามารถอัปโหลดไฟล์ STL หรือรูปภาพคอนเซปต์ให้ช่างประเมินราคาและสั่งพิมพ์ด้วยเรซิน 8K ได้ทันที
             </p>
           </div>
         </div>
 
         <Link
-          href="/studio"
+          href="/request-print"
           className="px-6 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-all whitespace-nowrap flex items-center gap-2"
         >
           <Wand2 className="w-4 h-4 text-violet-400" />
-          <span>เข้าสู่สตูดิโอสั่งพิมพ์ ➔</span>
+          <span>ส่งคำขอสั่งพิมพ์ชิ้นงาน ➔</span>
         </Link>
       </div>
     </div>

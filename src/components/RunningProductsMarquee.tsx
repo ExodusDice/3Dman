@@ -25,8 +25,8 @@ const RUNNING_PRODUCTS: RunningProduct[] = [
     timeToPrint: 'จัดส่งใน 8 วัน',
     rating: 5,
     imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
-    badge: 'Meshy AI Generated',
-    price: '$79.00',
+    badge: 'Artisan Custom 3D',
+    price: '฿2,500',
   },
   {
     id: 'mesh_2',
@@ -37,7 +37,7 @@ const RUNNING_PRODUCTS: RunningProduct[] = [
     rating: 5,
     imageUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
     badge: 'Museum Cast Bronze',
-    price: '$115.00',
+    price: '฿3,800',
   },
   {
     id: 'mesh_3',
@@ -48,7 +48,7 @@ const RUNNING_PRODUCTS: RunningProduct[] = [
     rating: 5,
     imageUrl: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=800&q=80',
     badge: '8K Ultra Detail',
-    price: '$89.00',
+    price: '฿2,900',
   },
   {
     id: 'mesh_4',
@@ -58,56 +58,54 @@ const RUNNING_PRODUCTS: RunningProduct[] = [
     timeToPrint: 'จัดส่งใน 9 วัน',
     rating: 5,
     imageUrl: 'https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?auto=format&fit=crop&w=800&q=80',
-    badge: 'Glow in the Dark',
-    price: '$95.00',
+    badge: 'Heavy Mech Armor',
+    price: '฿3,200',
   },
   {
     id: 'mesh_5',
-    title: 'แจกันพารามิเตอร์ Voronoi ออร์แกนิก',
-    prompt: 'Parametric generative voronoi cellular sculpture vase architecture',
-    material: 'Industrial Matte PLA+',
+    title: 'แจกันเกลียวพารามิเตอร์ Voronoi',
+    prompt: 'Parametric twisted organic Voronoi spiral sculpture vase with smooth curves',
+    material: 'เรซินใสออพติคอล Crystal Clear',
     timeToPrint: 'จัดส่งใน 6 วัน',
     rating: 5,
-    imageUrl: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=800&q=80',
-    badge: 'Generative Art',
-    price: '$58.00',
+    imageUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
+    badge: 'Voronoi Art',
+    price: '฿1,800',
   },
   {
     id: 'mesh_6',
-    title: 'มาสคอตจิ้งจอกไซเบอร์ Chibi',
-    prompt: 'Cute cyber fox warrior mascot with oversized mechanical headset',
-    material: 'ฟูลคัลเลอร์ เซรามิก CMYK',
-    timeToPrint: 'จัดส่งใน 8 วัน',
+    title: 'มาสคอตจิ้งจอกไซเบอร์ตัวจิ๋ว',
+    prompt: 'Chibi cute robotic fox character wearing oversized mechanical headphones',
+    material: 'เรซิน 8K ความละเอียดสูง',
+    timeToPrint: 'จัดส่งใน 5 วัน',
     rating: 5,
-    imageUrl: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=800&q=80',
-    badge: 'Full Color CMYK',
-    price: '$82.00',
+    imageUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80',
+    badge: 'Chibi Anime Figurine',
+    price: '฿1,450',
   },
 ];
 
 export default function RunningProductsMarquee() {
-  // Duplicate list to achieve continuous infinite marquee loop
   const duplicatedProducts = [...RUNNING_PRODUCTS, ...RUNNING_PRODUCTS];
 
   return (
-    <div className="w-full py-12 bg-white border-y border-slate-200 overflow-hidden relative">
-      {/* Section Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center space-y-2">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-violet-50 border border-violet-200 text-violet-700 text-xs font-mono font-semibold">
-          <Sparkles className="w-3.5 h-3.5 text-violet-600 animate-spin" />
-          <span>Meshy.ai Generated & Physical Print Archive</span>
+    <div className="py-12 bg-white border-b border-slate-200 space-y-8 overflow-hidden">
+      {/* Header */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-50 text-violet-700 text-xs font-mono font-semibold border border-violet-200">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Verified Production Showcase • ผลงานจริงที่จัดส่งถึงมือลูกค้า</span>
         </div>
         <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-          ผลงานจริงที่ปั้นด้วย Meshy AI และผลิตสำเร็จแล้ว
+          ผลงานชิ้นงาน 3D จากช่างฝีมือ 3DMan และผลิตสำเร็จแล้ว
         </h2>
         <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto">
-          ชมผลงานชิ้นเอกที่สร้างจากคำสั่ง AI และพิมพ์ด้วยวัสดุจริงคุณภาพสูง จัดส่งถึงมือผู้สั่งซื้อในไทย
+          ชมผลงานชิ้นเอกที่สั่งทำตามแบบและพิมพ์ด้วยวัสดุจริงคุณภาพสูง จัดส่งถึงมือผู้สั่งซื้อในไทย
         </p>
       </div>
 
       {/* Marquee Track Container */}
       <div className="relative w-full overflow-hidden">
-        {/* Left & Right gradient fade masks for white background */}
         <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
 
@@ -165,10 +163,10 @@ export default function RunningProductsMarquee() {
                 </span>
 
                 <Link
-                  href="/studio"
+                  href="/request-print"
                   className="text-violet-600 hover:text-violet-700 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform text-xs"
                 >
-                  <span>ปั้นแบบนี้</span>
+                  <span>สั่งทำแบบนี้</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>

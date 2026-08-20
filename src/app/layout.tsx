@@ -4,8 +4,8 @@ import AppLayout from "@/components/AppLayout";
 import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
-  title: "3DMan Thailand - บริการสร้างโมเดล 3D ด้วย AI & ผลิตพิมพ์ชิ้นงานจริงครบวงจร",
-  description: "ปั้นโมเดล 3D ด้วย Meshy AI หมุนดูได้ 360 องศา เลือกวัสดุเรซิน 8K คาร์บอนไฟเบอร์ หรือทองสัมฤทธิ์หล่อแท้ พร้อมจัดส่งถึงบ้านในไทยภายใน 14 วัน รับประกันคืนเงิน 100%",
+  title: "3DMan Thailand - บริการสั่งทำและพิมพ์ชิ้นงาน 3D ครบวงจร โปร่งใสทุกขั้นตอน",
+  description: "บริการสั่งทำชิ้นงาน 3D ช่างเขียนแบบเฉพาะคุณ ตรวจแก้ได้ 3 ครั้ง มัดจำเริ่มงาน 300 บาท (คืนเงินได้) พร้อมผลิตด้วยเรซิน 8K และรับ Cashback 300 บาทเมื่อส่งรูปรีวิว",
 };
 
 export default function RootLayout({

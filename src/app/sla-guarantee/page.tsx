@@ -99,10 +99,10 @@ export default function SlaGuaranteePage() {
             พร้อมที่จะสร้างผลงานประติมากรรม 3D ชิ้นแรกของคุณแล้วหรือยัง?
           </div>
           <Link
-            href="/studio"
+            href="/request-print"
             className="px-6 py-3 rounded-2xl bg-gradient-to-r from-violet-600 to-cyan-600 text-white font-bold text-xs shadow-md shadow-violet-500/25 hover:scale-105 transition-all flex items-center gap-2"
           >
-            <span>เริ่มสร้างโมเดลในสตูดิโอ 3D AI</span>
+            <span>ส่งคำขอสั่งทำชิ้นงาน 3D ทันที</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
